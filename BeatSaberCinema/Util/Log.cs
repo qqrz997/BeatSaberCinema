@@ -4,12 +4,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using IPA.Logging;
 
-namespace BeatSaberCinema
+namespace BeatSaberCinema;
+
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
+public static class Log
 {
-	[SuppressMessage("ReSharper", "UnusedMember.Global")]
-	public static class Log
-	{
-		internal static Logger IpaLogger = null!;
+	internal static Logger IpaLogger = null!;
 
 #if DEBUG
 		private static void _Log(string message, Logger.Level logLevel, string filePath, string member, int line)
@@ -46,56 +46,55 @@ namespace BeatSaberCinema
 			_Log(message, Logger.Level.Error, filePath, member, line);
 		}
 #else
-		private static void _Log(string message, Logger.Level logLevel)
-		{
-			IpaLogger.Log(logLevel, message);
-		}
+	private static void _Log(string message, Logger.Level logLevel)
+	{
+		IpaLogger.Log(logLevel, message);
+	}
 
-		public static void Debug(string message, bool evenInReleaseBuild)
-		{
-			_Log(message, Logger.Level.Debug);
-		}
+	public static void Debug(string message, bool evenInReleaseBuild)
+	{
+		_Log(message, Logger.Level.Debug);
+	}
 
-		public static void Info(string message)
-		{
-			_Log(message, Logger.Level.Info);
-		}
+	public static void Info(string message)
+	{
+		_Log(message, Logger.Level.Info);
+	}
 
-		public static void Warn(string message)
-		{
-			_Log(message, Logger.Level.Warning);
-		}
+	public static void Warn(string message)
+	{
+		_Log(message, Logger.Level.Warning);
+	}
 
-		public static void Error(string message)
-		{
-			_Log(message, Logger.Level.Error);
-		}
+	public static void Error(string message)
+	{
+		_Log(message, Logger.Level.Error);
+	}
 #endif
-		[Conditional("DEBUG")]
-		public static void Debug(Exception exception)
-		{
-			IpaLogger.Log(Logger.Level.Debug, exception);
-		}
+	[Conditional("DEBUG")]
+	public static void Debug(Exception exception)
+	{
+		IpaLogger.Log(Logger.Level.Debug, exception);
+	}
 
-		[Conditional("DEBUG")]
-		public static void Debug(string message)
-		{
-			IpaLogger.Log(Logger.Level.Debug, message);
-		}
+	[Conditional("DEBUG")]
+	public static void Debug(string message)
+	{
+		IpaLogger.Log(Logger.Level.Debug, message);
+	}
 
-		public static void Info(Exception exception)
-		{
-			IpaLogger.Log(Logger.Level.Info, exception);
-		}
+	public static void Info(Exception exception)
+	{
+		IpaLogger.Log(Logger.Level.Info, exception);
+	}
 
-		public static void Warn(Exception exception)
-		{
-			IpaLogger.Log(Logger.Level.Warning, exception);
-		}
+	public static void Warn(Exception exception)
+	{
+		IpaLogger.Log(Logger.Level.Warning, exception);
+	}
 
-		public static void Error(Exception exception)
-		{
-			IpaLogger.Log(Logger.Level.Error, exception);
-		}
+	public static void Error(Exception exception)
+	{
+		IpaLogger.Log(Logger.Level.Error, exception);
 	}
 }

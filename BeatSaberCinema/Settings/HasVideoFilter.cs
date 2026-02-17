@@ -3,27 +3,26 @@ using System.Threading.Tasks;
 using BetterSongList.FilterModels;
 using BetterSongList.Interfaces;
 
-namespace BeatSaberCinema
+namespace BeatSaberCinema;
+
+public class HasVideoFilter : IFilter, ITransformerPlugin
 {
-	public class HasVideoFilter : IFilter, ITransformerPlugin
+	public bool isReady => true;
+	public string name => "Cinema";
+	public bool visible { get; } = Plugin.Enabled && SettingsStore.Instance.PluginEnabled;
+
+	public bool GetValueFor(BeatmapLevel level)
 	{
-		public bool isReady => true;
-		public string name => "Cinema";
-		public bool visible { get; } = Plugin.Enabled && SettingsStore.Instance.PluginEnabled;
+		return VideoLoader.MapsWithVideo.TryGetValue(level.levelID, out _);
+	}
 
-		public bool GetValueFor(BeatmapLevel level)
-		{
-			return VideoLoader.MapsWithVideo.TryGetValue(level.levelID, out _);
-		}
+	public Task Prepare(CancellationToken cancelToken)
+	{
+		return Task.CompletedTask;
+	}
 
-		public Task Prepare(CancellationToken cancelToken)
-		{
-			return Task.CompletedTask;
-		}
-
-		public void ContextSwitch(SelectLevelCategoryViewController.LevelCategory levelCategory, BeatmapLevelPack? playlist)
-		{
-			//Not needed
-		}
+	public void ContextSwitch(SelectLevelCategoryViewController.LevelCategory levelCategory, BeatmapLevelPack? playlist)
+	{
+		//Not needed
 	}
 }

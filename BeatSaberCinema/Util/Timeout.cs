@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace BeatSaberCinema
+namespace BeatSaberCinema;
+
+public class Timeout
 {
-	public class Timeout
+	private readonly Stopwatch _timer;
+	private readonly long _timeoutTicks;
+
+	public bool HasTimedOut => _timer.ElapsedTicks >= _timeoutTicks;
+
+	public Timeout(float timeoutSec)
 	{
-		private readonly Stopwatch _timer;
-		private readonly long _timeoutTicks;
+		_timer = new Stopwatch();
+		_timer.Start();
+		_timeoutTicks = (long) (timeoutSec * TimeSpan.TicksPerSecond);
+	}
 
-		public bool HasTimedOut => _timer.ElapsedTicks >= _timeoutTicks;
-
-		public Timeout(float timeoutSec)
-		{
-			_timer = new Stopwatch();
-			_timer.Start();
-			_timeoutTicks = (long) (timeoutSec * TimeSpan.TicksPerSecond);
-		}
-
-		public void Stop()
-		{
-			_timer.Stop();
-		}
+	public void Stop()
+	{
+		_timer.Stop();
 	}
 }

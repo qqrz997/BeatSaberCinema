@@ -3,49 +3,48 @@ using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 
-namespace BeatSaberCinema
+namespace BeatSaberCinema;
+
+public class HarmonyPatchController
 {
-	public class HarmonyPatchController
+	private List<PatchClassProcessor>? _patchClassProcessorList;
+	private Harmony _harmonyInstance = null!;
+	private const string HARMONY_ID = "com.github.kevga.cinema";
+
+	private void InitPatches()
 	{
-		private List<PatchClassProcessor>? _patchClassProcessorList;
-		private Harmony _harmonyInstance = null!;
-		private const string HARMONY_ID = "com.github.kevga.cinema";
+		_harmonyInstance = new Harmony(HARMONY_ID);
 
-		private void InitPatches()
-		{
-			_harmonyInstance = new Harmony(HARMONY_ID);
-
-			_patchClassProcessorList = new List<PatchClassProcessor>();
-			(AccessTools.GetTypesFromAssembly(Assembly.GetExecutingAssembly())).Do<Type>(type =>
-				{
-					if (type.FullName?.StartsWith("BeatSaberCinema.Patches") ?? false)
-					{
-						_patchClassProcessorList.Add(_harmonyInstance.CreateClassProcessor(type));
-					}
-				}
-			);
-		}
-
-		internal void PatchAll()
-		{
-			InitPatches();
-
-			_patchClassProcessorList?.ForEach(patchClassProcessor =>
+		_patchClassProcessorList = new List<PatchClassProcessor>();
+		(AccessTools.GetTypesFromAssembly(Assembly.GetExecutingAssembly())).Do<Type>(type =>
 			{
-				try
+				if (type.FullName?.StartsWith("BeatSaberCinema.Patches") ?? false)
 				{
-					patchClassProcessor.Patch();
+					_patchClassProcessorList.Add(_harmonyInstance.CreateClassProcessor(type));
 				}
-				catch (Exception e)
-				{
-					Log.Error(e);
-				}
-			});
-		}
+			}
+		);
+	}
 
-		internal void UnpatchAll()
+	internal void PatchAll()
+	{
+		InitPatches();
+
+		_patchClassProcessorList?.ForEach(patchClassProcessor =>
 		{
-			_harmonyInstance.UnpatchSelf();
-		}
+			try
+			{
+				patchClassProcessor.Patch();
+			}
+			catch (Exception e)
+			{
+				Log.Error(e);
+			}
+		});
+	}
+
+	internal void UnpatchAll()
+	{
+		_harmonyInstance.UnpatchSelf();
 	}
 }

@@ -3,45 +3,44 @@ using JetBrains.Annotations;
 
 // ReSharper disable InconsistentNaming
 
-namespace BeatSaberCinema.Patches
+namespace BeatSaberCinema.Patches;
+
+[HarmonyPatch(typeof(LevelCollectionViewController), nameof(LevelCollectionViewController.HandleLevelCollectionTableViewDidSelectLevel))]
+public class LevelSelectionPatch
 {
-	[HarmonyPatch(typeof(LevelCollectionViewController), nameof(LevelCollectionViewController.HandleLevelCollectionTableViewDidSelectLevel))]
-	public class LevelSelectionPatch
+	[UsedImplicitly]
+	public static void Prefix(BeatmapLevel level)
 	{
-		[UsedImplicitly]
-		public static void Prefix(BeatmapLevel level)
-		{
-			Events.SetSelectedLevel(level);
-		}
+		Events.SetSelectedLevel(level);
 	}
+}
 
-	[HarmonyPatch(typeof(LevelCollectionViewController), nameof(LevelCollectionViewController.HandleLevelCollectionTableViewDidSelectPack))]
-	public class PackSelectionPatch
+[HarmonyPatch(typeof(LevelCollectionViewController), nameof(LevelCollectionViewController.HandleLevelCollectionTableViewDidSelectPack))]
+public class PackSelectionPatch
+{
+	[UsedImplicitly]
+	public static void Prefix()
 	{
-		[UsedImplicitly]
-		public static void Prefix()
-		{
-			Events.SetSelectedLevel(null);
-		}
+		Events.SetSelectedLevel(null);
 	}
+}
 
-	[HarmonyPatch(typeof(MainMenuViewController), nameof(MainMenuViewController.DidActivate))]
-	public class MainMenuSelectionResetPatch
+[HarmonyPatch(typeof(MainMenuViewController), nameof(MainMenuViewController.DidActivate))]
+public class MainMenuSelectionResetPatch
+{
+	[UsedImplicitly]
+	public static void Prefix()
 	{
-		[UsedImplicitly]
-		public static void Prefix()
-		{
-			Events.SetSelectedLevel(null);
-		}
+		Events.SetSelectedLevel(null);
 	}
+}
 
-	[HarmonyPatch(typeof(LobbySetupViewController), nameof(LobbySetupViewController.DidActivate))]
-	public class MultiplayerMenuSelectionResetPatch
+[HarmonyPatch(typeof(LobbySetupViewController), nameof(LobbySetupViewController.DidActivate))]
+public class MultiplayerMenuSelectionResetPatch
+{
+	[UsedImplicitly]
+	public static void Prefix()
 	{
-		[UsedImplicitly]
-		public static void Prefix()
-		{
-			Events.SetSelectedLevel(null);
-		}
+		Events.SetSelectedLevel(null);
 	}
 }

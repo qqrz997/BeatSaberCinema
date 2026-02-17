@@ -178,14 +178,14 @@ public class CustomVideoPlayer : MonoBehaviour
 			var bundle = await BeatSaberMarkupLanguage.Utilities.GetResourceAsync(Assembly.GetExecutingAssembly(), "BeatSaberCinema.Resources.bscinema.bundle");
 			if (bundle == null || bundle.Length == 0)
 			{
-				Log.Error("GetResource failed");
+				Plugin.Log.Error("GetResource failed");
 				return Shader.Find("Hidden/BlitAdd");
 			}
 
 			myLoadedAssetBundle = AssetBundle.LoadFromMemory(bundle);
 			if (myLoadedAssetBundle == null)
 			{
-				Log.Error("LoadFromMemory failed");
+				Plugin.Log.Error("LoadFromMemory failed");
 				return Shader.Find("Hidden/BlitAdd");
 			}
 		}
@@ -248,7 +248,7 @@ public class CustomVideoPlayer : MonoBehaviour
 		//So, we wait before the player renders its first frame and then set the color, making the switch invisible.
 		FadeIn();
 		_firstFrameStopwatch.Stop();
-		Log.Debug("Delay from Play() to first frame: "+_firstFrameStopwatch.ElapsedMilliseconds+" ms");
+		Plugin.Log.Debug("Delay from Play() to first frame: "+_firstFrameStopwatch.ElapsedMilliseconds+" ms");
 		_firstFrameStopwatch.Reset();
 		screenController.SetAspectRatio(GetVideoAspectRatio());
 		Player.frameReady -= FirstFrameReady;
@@ -322,7 +322,7 @@ public class CustomVideoPlayer : MonoBehaviour
 			return;
 		}
 
-		Log.Debug("Starting playback, waiting for first frame...");
+		Plugin.Log.Debug("Starting playback, waiting for first frame...");
 		_waitingForFadeOut = false;
 		_firstFrameStopwatch.Start();
 		Player.frameReady -= FirstFrameReady;
@@ -339,7 +339,7 @@ public class CustomVideoPlayer : MonoBehaviour
 
 	public void Stop()
 	{
-		Log.Debug("Stopping playback");
+		Plugin.Log.Debug("Stopping playback");
 		Player.Stop();
 		stopped?.Invoke();
 		SetStaticTexture(null);
@@ -415,14 +415,14 @@ public class CustomVideoPlayer : MonoBehaviour
 
 	private static void VideoPlayerPrepareComplete(VideoPlayer source)
 	{
-		Log.Debug("Video player prepare complete");
+		Plugin.Log.Debug("Video player prepare complete");
 		var texture = source.texture;
-		Log.Debug($"Video resolution: {texture.width}x{texture.height}");
+		Plugin.Log.Debug($"Video resolution: {texture.width}x{texture.height}");
 	}
 
 	private void VideoPlayerStarted(VideoPlayer source)
 	{
-		Log.Debug("Video player started event");
+		Plugin.Log.Debug("Video player started event");
 		_currentlyPlayingVideo = source.url;
 		_waitingForFadeOut = false;
 		VideoEnded = false;
@@ -430,7 +430,7 @@ public class CustomVideoPlayer : MonoBehaviour
 
 	private void VideoPlayerFinished(VideoPlayer source)
 	{
-		Log.Debug("Video player loop point event");
+		Plugin.Log.Debug("Video player loop point event");
 		if (!Player.isLooping)
 		{
 			VideoEnded = true;
@@ -446,7 +446,7 @@ public class CustomVideoPlayer : MonoBehaviour
 			return;
 		}
 
-		Log.Error("Video player error: " + message);
+		Plugin.Log.Error("Video player error: " + message);
 		PlaybackController.Instance.StopPlayback();
 		var config = PlaybackController.Instance.VideoConfig;
 		if (config == null)
@@ -480,7 +480,7 @@ public class CustomVideoPlayer : MonoBehaviour
 			return aspectRatio;
 		}
 
-		Log.Debug("Using default aspect ratio (texture missing)");
+		Plugin.Log.Debug("Using default aspect ratio (texture missing)");
 		return 16f / 9f;
 	}
 

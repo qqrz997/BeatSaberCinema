@@ -38,12 +38,12 @@ public class DownloadController: YoutubeDLController
 
 	private IEnumerator DownloadVideoCoroutine(VideoConfig video, VideoQuality.Mode quality)
 	{
-		Log.Info($"Starting download of {video.title}");
+		Plugin.Log.Info($"Starting download of {video.title}");
 
 		var downloadProcess = CreateDownloadProcess(video, quality);
 		if (downloadProcess == null)
 		{
-			Log.Warn("Failed to create download process");
+			Plugin.Log.Warn("Failed to create download process");
 			yield break;
 		}
 
@@ -51,7 +51,7 @@ public class DownloadController: YoutubeDLController
 		video.DownloadState = DownloadState.Preparing;
 		DownloadProgress?.Invoke(video);
 
-		Log.Info(
+		Plugin.Log.Info(
 			$"youtube-dl command: \"{downloadProcess.StartInfo.FileName}\" {downloadProcess.StartInfo.Arguments}");
 
 		var timeout = new Timeout(5 * 60);
@@ -76,7 +76,7 @@ public class DownloadController: YoutubeDLController
 		yield return new WaitUntil(() => !IsProcessRunning(downloadProcess) || timeout.HasTimedOut);
 		if (timeout.HasTimedOut)
 		{
-			Log.Warn($"[{downloadProcess.Id}] Timeout reached, disposing download process");
+			Plugin.Log.Warn($"[{downloadProcess.Id}] Timeout reached, disposing download process");
 		}
 		else
 		{
@@ -95,7 +95,7 @@ public class DownloadController: YoutubeDLController
 			return;
 		}
 
-		Log.Debug(eventArgs.Data);
+		Plugin.Log.Debug(eventArgs.Data);
 		ParseDownloadProgress(video, eventArgs);
 		DownloadProgress?.Invoke(video);
 	}
@@ -108,7 +108,7 @@ public class DownloadController: YoutubeDLController
 			return;
 		}
 
-		Log.Error(error);
+		Plugin.Log.Error(error);
 		video.ErrorMessage = ShortenErrorMessage(error);
 	}
 
@@ -120,11 +120,11 @@ public class DownloadController: YoutubeDLController
 			video.DownloadState = DownloadState.NotDownloaded;
 		}
 
-		Log.Info($"[{process.Id}] Download process exited with code {exitCode}");
+		Plugin.Log.Info($"[{process.Id}] Download process exited with code {exitCode}");
 
 		if (video.DownloadState == DownloadState.Cancelled || video.DownloadState == DownloadState.NotDownloaded)
 		{
-			Log.Info("Cancelled download");
+			Plugin.Log.Info("Cancelled download");
 			VideoLoader.DeleteVideo(video);
 			DownloadFinished?.Invoke(video);
 		}
@@ -136,7 +136,7 @@ public class DownloadController: YoutubeDLController
 			video.ErrorMessage = null;
 			video.NeedsToSave = true;
 			CoroutineStarter.Instance.StartCoroutine(WaitForDownloadToFinishCoroutine(video));
-			Log.Info($"Download of {video.title} finished");
+			Plugin.Log.Info($"Download of {video.title} finished");
 		}
 
 		DisposeProcess(process);
@@ -151,7 +151,7 @@ public class DownloadController: YoutubeDLController
 			var success = _downloadProcesses.TryRemove(dictionaryEntry.Key, out _);
 			if (!success)
 			{
-				Log.Error("Failed to remove disposed process from list of processes!");
+				Plugin.Log.Error("Failed to remove disposed process from list of processes!");
 			}
 			else
 			{
@@ -213,27 +213,27 @@ public class DownloadController: YoutubeDLController
 	{
 		if (video.LevelDir == null || video.VideoPath == null)
 		{
-			Log.Error("LevelDir was null during download");
+			Plugin.Log.Error("LevelDir was null during download");
 			return null;
 		}
 
 		var success = _downloadProcesses.TryGetValue(video, out _);
 		if (success)
 		{
-			Log.Warn("Existing process not cleaned up yet. Cancelling download attempt.");
+			Plugin.Log.Warn("Existing process not cleaned up yet. Cancelling download attempt.");
 			return null;
 		}
 
 		var path = Path.GetDirectoryName(video.VideoPath);
 		if (video.VideoPath != null && path != null && !Directory.Exists(path))
 		{
-			Log.Debug("Creating folder: "+path);
+			Plugin.Log.Debug("Creating folder: "+path);
 			//Needed for OST/WIP videos
 			Directory.CreateDirectory(path);
 		}
 		else
 		{
-			Log.Debug("Folder already exists: "+path);
+			Plugin.Log.Debug("Folder already exists: "+path);
 		}
 
 		string videoUrl;
@@ -245,7 +245,7 @@ public class DownloadController: YoutubeDLController
 			}
 			else
 			{
-				Log.Error($"Video hoster for {video.videoUrl} is not allowed");
+				Plugin.Log.Error($"Video hoster for {video.videoUrl} is not allowed");
 				return null;
 			}
 		}
@@ -255,7 +255,7 @@ public class DownloadController: YoutubeDLController
 		}
 		else
 		{
-			Log.Error("Video config has neither videoID or videoUrl set");
+			Plugin.Log.Error("Video config has neither videoID or videoUrl set");
 			return null;
 		}
 
@@ -279,7 +279,7 @@ public class DownloadController: YoutubeDLController
 
 	public void CancelDownload(VideoConfig video)
 	{
-		Log.Debug("Cancelling download");
+		Plugin.Log.Debug("Cancelling download");
 		video.DownloadState = DownloadState.Cancelled;
 		DownloadProgress?.Invoke(video);
 

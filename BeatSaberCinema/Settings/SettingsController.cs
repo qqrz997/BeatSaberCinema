@@ -170,7 +170,7 @@ public class SettingsController: BSMLResourceViewController
 		}
 		catch (Exception e)
 		{
-			BeatSaberCinema.Log.Debug(e);
+			BeatSaberCinema.Plugin.Log.Debug(e);
 		}
 	}
 }

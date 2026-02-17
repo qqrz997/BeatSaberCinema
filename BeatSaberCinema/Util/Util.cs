@@ -76,7 +76,7 @@ public static class Util
 			return s.Substring(0, allowedLength);
 		}
 
-		Log.Warn("Video path length might be too long!");
+		Plugin.Log.Warn("Video path length might be too long!");
 		return s;
 	}
 
@@ -150,7 +150,7 @@ public static class Util
 		}
 		catch (Exception e)
 		{
-			Log.Error(e);
+			Plugin.Log.Error(e);
 		}
 
 		return string.Join("\n", info);

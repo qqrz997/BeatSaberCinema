@@ -46,7 +46,7 @@ public abstract class YoutubeDLController
 			return;
 		}
 
-		Log.Debug($"[{processId}] Cleaning up process");
+		Plugin.Log.Debug($"[{processId}] Cleaning up process");
 
 		void WorkDelegate()
 		{
@@ -62,7 +62,7 @@ public abstract class YoutubeDLController
 				if (!exception.Message.Contains("The operation completed successfully") &&
 				    !exception.Message.Contains("No process is associated with this object."))
 				{
-					Log.Warn(exception);
+					Plugin.Log.Warn(exception);
 				}
 			}
 
@@ -72,7 +72,7 @@ public abstract class YoutubeDLController
 			}
 			catch (Exception exception)
 			{
-				Log.Warn(exception);
+				Plugin.Log.Warn(exception);
 			}
 		}
 
@@ -114,10 +114,10 @@ public abstract class YoutubeDLController
 			var ret = process.Start();
 			process.BeginOutputReadLine();
 			process.BeginErrorReadLine();
-			Log.Debug($"Starting thread took {timer.Elapsed.TotalMilliseconds}ms");
+			Plugin.Log.Debug($"Starting thread took {timer.Elapsed.TotalMilliseconds}ms");
 			if (!ret)
 			{
-				Log.Error("Failed to start thread");
+				Plugin.Log.Error("Failed to start thread");
 			}
 		}
 
@@ -135,7 +135,7 @@ public abstract class YoutubeDLController
 		{
 			if (!(e is InvalidOperationException))
 			{
-				Log.Warn(e);
+				Plugin.Log.Warn(e);
 			}
 		}
 
@@ -144,6 +144,6 @@ public abstract class YoutubeDLController
 
 	private static void OnProcessDisposed(object sender, EventArgs eventArgs)
 	{
-		Log.Debug("Process disposed");
+		Plugin.Log.Debug("Process disposed");
 	}
 }

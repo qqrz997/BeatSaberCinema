@@ -35,7 +35,7 @@ public static class EnvironmentController
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 			var gameObjects = Resources.FindObjectsOfTypeAll<GameObject>();
-			Log.Debug($"Resource call finished after {stopwatch.ElapsedMilliseconds} ms");
+			Plugin.Log.Debug($"Resource call finished after {stopwatch.ElapsedMilliseconds} ms");
 			var activeScene = SceneManager.GetActiveScene();
 			var currentEnvironmentScene = SceneManager.GetSceneByName(_currentEnvironmentName);
 			var pcInitScene = SceneManager.GetSceneByName("PCInit"); //This scene is used by CustomPlatforms
@@ -51,7 +51,7 @@ public static class EnvironmentController
 			}
 
 			stopwatch.Stop();
-			Log.Debug($"Created environment object list in {stopwatch.ElapsedMilliseconds} ms, items: {_environmentObjectList.Count}");
+			Plugin.Log.Debug($"Created environment object list in {stopwatch.ElapsedMilliseconds} ms, items: {_environmentObjectList.Count}");
 
 			return _environmentObjectList;
 		}
@@ -70,7 +70,7 @@ public static class EnvironmentController
 
 	private static void SceneChanged(Scene arg0, Scene arg1)
 	{
-		Log.Debug($"Scene changed from {arg0.name} to {arg1.name}");
+		Plugin.Log.Debug($"Scene changed from {arg0.name} to {arg1.name}");
 		var sceneName = arg1.name;
 		if (sceneName == "BeatmapLevelEditorWorldUi")
 		{
@@ -103,7 +103,7 @@ public static class EnvironmentController
 
 		_environmentModified = true;
 		_currentEnvironmentName = Util.GetEnvironmentName();
-		Log.Debug("Loaded environment: "+_currentEnvironmentName);
+		Plugin.Log.Debug("Loaded environment: "+_currentEnvironmentName);
 
 		var stopwatch = new Stopwatch();
 		stopwatch.Start();
@@ -121,7 +121,7 @@ public static class EnvironmentController
 		}
 		catch (Exception e)
 		{
-			Log.Error(e);
+			Plugin.Log.Error(e);
 		}
 
 		try
@@ -130,11 +130,11 @@ public static class EnvironmentController
 		}
 		catch (Exception e)
 		{
-			Log.Error(e);
+			Plugin.Log.Error(e);
 		}
 
 		stopwatch.Stop();
-		Log.Debug($"Modified environment in {stopwatch.ElapsedMilliseconds} ms");
+		Plugin.Log.Debug($"Modified environment in {stopwatch.ElapsedMilliseconds} ms");
 	}
 
 	private static void Reset()
@@ -155,7 +155,7 @@ public static class EnvironmentController
 			foreach (var screen in PlaybackController.Instance.VideoPlayer.screenController.Screens.Where(screen => screen.name.Contains("Clone")))
 			{
 				Object.Destroy(screen);
-				Log.Debug("Destroyed screen");
+				Plugin.Log.Debug("Destroyed screen");
 			}
 
 			PlaybackController.Instance.VideoPlayer.screenController.Screens.RemoveRange(1, PlaybackController.Instance.VideoPlayer.screenController.Screens.Count - 1);
@@ -173,16 +173,16 @@ public static class EnvironmentController
 						if (trackControllerType != null)
 						{
 							Object.Destroy(mainScreen.GetComponent(trackControllerType));
-							Log.Debug($"Destroyed {typeName}");
+							Plugin.Log.Debug($"Destroyed {typeName}");
 						}
 						else
 						{
-							Log.Debug($"Failed to find type {typeName}");
+							Plugin.Log.Debug($"Failed to find type {typeName}");
 						}
 					}
 					catch (Exception)
 					{
-						Log.Debug($"Failed to remove {typeName} from screen");
+						Plugin.Log.Debug($"Failed to remove {typeName} from screen");
 					}
 				}
 			}
@@ -208,7 +208,7 @@ public static class EnvironmentController
 			IsScreenHidden = true;
 			/*mainScreen.GetComponent<CustomBloomPrePass>().enabled = false;
 			PlaybackController.Instance.LightController.enabled = false;*/
-			Log.Info("Hiding video screen due to custom platform");
+			Plugin.Log.Info("Hiding video screen due to custom platform");
 		}
 
 		//FrontLights appear in many environments and need to be removed in all of them
@@ -236,7 +236,7 @@ public static class EnvironmentController
 					var match = Regex.Match(laserName, "^DoubleColorLaser \\(([0-9])\\)$");
 					if (!match.Success)
 					{
-						Log.Debug($"Could not find index of: {laserName}");
+						Plugin.Log.Debug($"Could not find index of: {laserName}");
 						continue;
 					}
 					var i = int.Parse(match.Groups[1].Value);
@@ -292,7 +292,7 @@ public static class EnvironmentController
 					var match = Regex.Match(pillarPairName, "PillarPair \\(([0-9])\\)$");
 					if (!match.Success)
 					{
-						Log.Debug($"Could not find index of: {pillarPairName}");
+						Plugin.Log.Debug($"Could not find index of: {pillarPairName}");
 						continue;
 					}
 					var i = int.Parse(match.Groups[1].Value);
@@ -337,7 +337,7 @@ public static class EnvironmentController
 				}
 				else
 				{
-					Log.Warn("BTS movement effect not found");
+					Plugin.Log.Warn("BTS movement effect not found");
 				}
 				break;
 			}
@@ -1020,7 +1020,7 @@ public static class EnvironmentController
 				var clone = screenController.Screens.Find(screen => screen.name.EndsWith("(" + (i) + ")"));
 				if (!clone)
 				{
-					Log.Error($"Couldn't find a screen ending with {"(" + (i) + ")"}");
+					Plugin.Log.Error($"Couldn't find a screen ending with {"(" + (i) + ")"}");
 					continue;
 				}
 				if (screenConfig.position.HasValue)
@@ -1052,7 +1052,7 @@ public static class EnvironmentController
 			var selectedObjectsList = SelectObjectsFromScene(environmentModification, false);
 			if (!selectedObjectsList.Any())
 			{
-				Log.Error($"Failed to find object: name={environmentModification.name}, parentName={environmentModification.parentName ?? "null"}, cloneFrom={environmentModification.cloneFrom ?? "null"}");
+				Plugin.Log.Error($"Failed to find object: name={environmentModification.name}, parentName={environmentModification.parentName ?? "null"}, cloneFrom={environmentModification.cloneFrom ?? "null"}");
 				continue;
 			}
 
@@ -1109,7 +1109,7 @@ public static class EnvironmentController
 		}
 		catch (Exception e)
 		{
-			Log.Warn(e);
+			Plugin.Log.Warn(e);
 		}
 
 		var environmentObjectList = (environmentObjects ?? Array.Empty<EnvironmentObject>()).ToList();
@@ -1141,7 +1141,7 @@ public static class EnvironmentController
 			return;
 		}
 
-		Log.Debug($"Screens found: {screenCount}");
+		Plugin.Log.Debug($"Screens found: {screenCount}");
 		foreach (Transform screen in PlaybackController.Instance.gameObject.transform)
 		{
 			if (!screen.name.StartsWith("CinemaScreen"))
@@ -1157,7 +1157,7 @@ public static class EnvironmentController
 			}
 
 			screen.gameObject.GetComponent<CustomBloomPrePass>().enabled = false;
-			Log.Debug("Disabled bloom prepass");
+			Plugin.Log.Debug("Disabled bloom prepass");
 		}
 
 		PlaybackController.Instance.VideoPlayer.SetPlacement(
@@ -1173,7 +1173,7 @@ public static class EnvironmentController
 			return;
 		}
 
-		Log.Debug("Cloning objects");
+		Plugin.Log.Debug("Cloning objects");
 		var cloneCounter = 0;
 		foreach (var objectToBeCloned in config.environment)
 		{
@@ -1185,7 +1185,7 @@ public static class EnvironmentController
 			var environmentObjectList = SelectObjectsFromScene(objectToBeCloned, true);
 			if (!environmentObjectList.Any())
 			{
-				Log.Error($"Failed to find object while cloning: name={objectToBeCloned.cloneFrom}, parentName={objectToBeCloned.parentName ?? "null"}");
+				Plugin.Log.Error($"Failed to find object while cloning: name={objectToBeCloned.cloneFrom}, parentName={objectToBeCloned.parentName ?? "null"}");
 				continue;
 			}
 
@@ -1193,7 +1193,7 @@ public static class EnvironmentController
 			CloneObject(originalObject, objectToBeCloned, config);
 			cloneCounter++;
 		}
-		Log.Debug("Cloned "+cloneCounter+" objects");
+		Plugin.Log.Debug("Cloned "+cloneCounter+" objects");
 	}
 
 	private static EnvironmentObject CloneObject(GameObject originalObject, EnvironmentModification objectToBeCloned, VideoConfig? config, bool disableZOffset = false)
@@ -1201,7 +1201,7 @@ public static class EnvironmentController
 		var lightManager = EnvironmentObjects.LastOrDefault(x => x.name == "LightWithIdManager");
 		if (lightManager == null)
 		{
-			Log.Error("Failed to find LightWithIdManager. Cannot clone lights.");
+			Plugin.Log.Error("Failed to find LightWithIdManager. Cannot clone lights.");
 		}
 
 		var clone = Object.Instantiate(originalObject, originalObject.transform.parent);
@@ -1228,7 +1228,7 @@ public static class EnvironmentController
 		}
 		catch (Exception e)
 		{
-			Log.Error(e);
+			Plugin.Log.Error(e);
 		}
 
 		var cloneEnvironmentObject = new EnvironmentObject(clone, true);
@@ -1267,7 +1267,7 @@ public static class EnvironmentController
 			return;
 		}
 
-		Log.Debug("Cloned a mirror surface");
+		Plugin.Log.Debug("Cloned a mirror surface");
 		var originalMirrorRenderer = mirror._mirrorRenderer;
 		var originalMaterial = mirror._mirrorMaterial;
 		var clonedMirrorRenderer = Object.Instantiate(originalMirrorRenderer);

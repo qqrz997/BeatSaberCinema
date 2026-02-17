@@ -141,7 +141,7 @@ public class PlaybackController: MonoBehaviour
 
 		ResyncVideo();
 		VideoPlayer.Player.frameReady += PlayerStartedAfterResync;
-		Log.Debug("Applying offset: "+offset);
+		Plugin.Log.Debug("Applying offset: "+offset);
 	}
 
 	private void PlayerStartedAfterResync(VideoPlayer player, long frame)
@@ -149,7 +149,7 @@ public class PlaybackController: MonoBehaviour
 		VideoPlayer.Player.frameReady -= PlayerStartedAfterResync;
 		if (_activeAudioSource == null)
 		{
-			Log.Warn("Active audio source was null in frame ready after resync");
+			Plugin.Log.Warn("Active audio source was null in frame ready after resync");
 			return;
 		}
 
@@ -241,7 +241,7 @@ public class PlaybackController: MonoBehaviour
 
 		if (frame % 120 == 0)
 		{
-			Log.Debug("Frame: " + frame + " - Player: " + Util.FormatFloat((float) playerTime) + " - AudioSource: " +
+			Plugin.Log.Debug("Frame: " + frame + " - Player: " + Util.FormatFloat((float) playerTime) + " - AudioSource: " +
 			          Util.FormatFloat(audioSourceTime) + " - Error (ms): " + Math.Round(error * 1000));
 		}
 
@@ -261,7 +261,7 @@ public class PlaybackController: MonoBehaviour
 
 		if (Math.Abs(audioSourceTime - _lastKnownAudioSourceTime) > 0.3f && VideoPlayer.IsPlaying)
 		{
-			Log.Debug("Detected AudioSource seek, resyncing...");
+			Plugin.Log.Debug("Detected AudioSource seek, resyncing...");
 			ResyncVideo();
 		}
 
@@ -271,7 +271,7 @@ public class PlaybackController: MonoBehaviour
 			//Audio can intentionally go out of sync when the level fails for example. Don't resync the video in that case.
 			if (_timeSyncController != null && !_timeSyncController.forcedNoAudioSync)
 			{
-				Log.Debug($"Detected desync (reference {referenceTime}, actual {playerTime}), resyncing...");
+				Plugin.Log.Debug($"Detected desync (reference {referenceTime}, actual {playerTime}), resyncing...");
 				ResyncVideo();
 			}
 		}
@@ -313,17 +313,17 @@ public class PlaybackController: MonoBehaviour
 	{
 		if (VideoConfig == null || _currentLevel == null)
 		{
-			Log.Warn("No video or level selected in OnPreviewAction");
+			Plugin.Log.Warn("No video or level selected in OnPreviewAction");
 			return;
 		}
 		if (IsPreviewPlaying)
 		{
-			Log.Debug("Stopping preview");
+			Plugin.Log.Debug("Stopping preview");
 			StopPreview(true);
 		}
 		else
 		{
-			Log.Debug("Starting preview");
+			Plugin.Log.Debug("Starting preview");
 			IsPreviewPlaying = true;
 
 			if (VideoPlayer.IsPlaying)
@@ -333,7 +333,7 @@ public class PlaybackController: MonoBehaviour
 
 			if (!VideoPlayer.IsPrepared)
 			{
-				Log.Debug("Video not prepared yet");
+				Plugin.Log.Debug("Video not prepared yet");
 			}
 
 			//Start the preview at the point the video kicks in
@@ -345,13 +345,13 @@ public class PlaybackController: MonoBehaviour
 
 			if (SongPreviewPlayerController.SongPreviewPlayer == null)
 			{
-				Log.Error("Failed to get reference to SongPreviewPlayer during preview");
+				Plugin.Log.Error("Failed to get reference to SongPreviewPlayer during preview");
 				return;
 			}
 
 			try
 			{
-				Log.Debug($"Preview start time: {startTime}, offset: {VideoConfig.GetOffsetInSec()}");
+				Plugin.Log.Debug($"Preview start time: {startTime}, offset: {VideoConfig.GetOffsetInSec()}");
 				var audioClip = await VideoLoader.GetAudioClipForLevel(_currentLevel);
 				if (audioClip != null)
 				{
@@ -359,12 +359,12 @@ public class PlaybackController: MonoBehaviour
 				}
 				else
 				{
-					Log.Error("AudioClip for level failed to load");
+					Plugin.Log.Error("AudioClip for level failed to load");
 				}
 			}
 			catch (Exception e)
 			{
-				Log.Error(e);
+				Plugin.Log.Error(e);
 				IsPreviewPlaying = false;
 				return;
 			}
@@ -384,7 +384,7 @@ public class PlaybackController: MonoBehaviour
 		{
 			return;
 		}
-		Log.Debug($"Stopping preview (stop audio source: {stopPreviewMusic}");
+		Plugin.Log.Debug($"Stopping preview (stop audio source: {stopPreviewMusic}");
 
 		VideoPlayer.FadeOut();
 		StopAllCoroutines();
@@ -405,7 +405,7 @@ public class PlaybackController: MonoBehaviour
 
 	private void OnMenuSceneLoaded()
 	{
-		Log.Debug("MenuSceneLoaded");
+		Plugin.Log.Debug("MenuSceneLoaded");
 		_activeScene = Scene.Menu;
 		VideoPlayer.Hide();
 		StopAllCoroutines();
@@ -514,7 +514,7 @@ public class PlaybackController: MonoBehaviour
 
 	private void ConfigChangedFrameReadyHandler(VideoPlayer sender, long frameIdx)
 	{
-		Log.Debug("First frame after config change is ready");
+		Plugin.Log.Debug("First frame after config change is ready");
 		sender.frameReady -= ConfigChangedFrameReadyHandler;
 		if (_activeAudioSource == null)
 		{
@@ -537,7 +537,7 @@ public class PlaybackController: MonoBehaviour
 
 		_currentLevel = level;
 		VideoConfig = config;
-		Log.Debug($"Selected Level: {level?.levelID ?? "null"}");
+		Plugin.Log.Debug($"Selected Level: {level?.levelID ?? "null"}");
 
 		if (VideoConfig == null)
 		{
@@ -546,7 +546,7 @@ public class PlaybackController: MonoBehaviour
 			return;
 		}
 
-		Log.Debug("Preparing video...");
+		Plugin.Log.Debug("Preparing video...");
 		PrepareVideo(VideoConfig);
 		if (level != null && VideoLoader.IsDlcSong(level))
 		{
@@ -569,7 +569,7 @@ public class PlaybackController: MonoBehaviour
 		}
 		catch (Exception e)
 		{
-			Log.Error(e);
+			Plugin.Log.Error(e);
 		}
 	}
 
@@ -628,19 +628,19 @@ public class PlaybackController: MonoBehaviour
 			SceneManager.MoveGameObjectToScene(gameObject, scene);
 		}
 
-		Log.Debug("Moving to game scene");
+		Plugin.Log.Debug("Moving to game scene");
 	}
 
 	public void GameSceneLoaded()
 	{
 		StopAllCoroutines();
-		Log.Debug("GameSceneLoaded");
+		Plugin.Log.Debug("GameSceneLoaded");
 
 		_activeScene = Util.IsMultiplayer() ? Scene.MultiplayerGameplay : Scene.SoloGameplay;
 
 		if (!Plugin.Enabled)
 		{
-			Log.Debug("Plugin disabled");
+			Plugin.Log.Debug("Plugin disabled");
 			VideoPlayer.Hide();
 			return;
 		}
@@ -654,7 +654,7 @@ public class PlaybackController: MonoBehaviour
 		{
 			if (BS_Utils.Plugin.LevelData.Mode == Mode.None)
 			{
-				Log.Debug("Level mode is None");
+				Plugin.Log.Debug("Level mode is None");
 				return;
 			}
 
@@ -668,7 +668,7 @@ public class PlaybackController: MonoBehaviour
 
 		if (VideoConfig == null || !VideoConfig.IsPlayable)
 		{
-			Log.Debug("No video configured or video is not playable: "+VideoConfig?.VideoPath);
+			Plugin.Log.Debug("No video configured or video is not playable: "+VideoConfig?.VideoPath);
 
 			if (SettingsStore.Instance.CoverEnabled && (VideoConfig?.forceEnvironmentModifications == null || VideoConfig.forceEnvironmentModifications == false))
 			{
@@ -707,7 +707,7 @@ public class PlaybackController: MonoBehaviour
 
 		if (!preview)
 		{
-			Log.Debug("Waiting for ATSC to be ready");
+			Plugin.Log.Debug("Waiting for ATSC to be ready");
 
 			try
 			{
@@ -717,19 +717,19 @@ public class PlaybackController: MonoBehaviour
 					if (songPreviewPlayer._audioSourceControllers.Any())
 					{
 						_activeAudioSource = songPreviewPlayer._audioSourceControllers.First().audioSource;
-						Log.Debug("Got ATSC from SongPreviewPlayer");
+						Plugin.Log.Debug("Got ATSC from SongPreviewPlayer");
 					}
 				}
 				else
 				{
 					var atsc = Plugin.gameCoreContainer.Resolve<AudioTimeSyncController>();
 					_activeAudioSource = atsc._audioSource;
-					Log.Debug("Got ATSC from ATSC");
+					Plugin.Log.Debug("Got ATSC from ATSC");
 				}
 			}
 			catch
 			{
-				Log.Debug("Failed to get AudioSource from DiContainer");
+				Plugin.Log.Debug("Failed to get AudioSource from DiContainer");
 			}
 
 			if (_activeAudioSource == null)
@@ -758,11 +758,11 @@ public class PlaybackController: MonoBehaviour
 
 					if (_timeSyncController == null)
 					{
-						Log.Warn("Could not find ATSC the usual way. Did the object hierarchy change? Current scene name is " + SceneManager.GetActiveScene().name);
+						Plugin.Log.Warn("Could not find ATSC the usual way. Did the object hierarchy change? Current scene name is " + SceneManager.GetActiveScene().name);
 
 						//This throws an exception if we still don't find the ATSC
 						_timeSyncController = Resources.FindObjectsOfTypeAll<AudioTimeSyncController>().Last();
-						Log.Warn("Selected ATSC: " + _timeSyncController.name);
+						Plugin.Log.Warn("Selected ATSC: " + _timeSyncController.name);
 					}
 
 					_activeAudioSource = _timeSyncController._audioSource;
@@ -773,13 +773,13 @@ public class PlaybackController: MonoBehaviour
 		if (_activeAudioSource != null)
 		{
 			_lastKnownAudioSourceTime = 0;
-			Log.Debug($"Waiting for AudioSource {_activeAudioSource.name} to start playing");
+			Plugin.Log.Debug($"Waiting for AudioSource {_activeAudioSource.name} to start playing");
 			yield return new WaitUntil(() => _activeAudioSource.isPlaying);
 			startTime = _activeAudioSource.time;
 		}
 		else
 		{
-			Log.Warn("Active AudioSource was null, cannot wait for it to start");
+			Plugin.Log.Warn("Active AudioSource was null, cannot wait for it to start");
 			StopPreview(true);
 			yield break;
 		}
@@ -812,7 +812,7 @@ public class PlaybackController: MonoBehaviour
 		}
 		catch (Exception e)
 		{
-			Log.Warn(e);
+			Plugin.Log.Warn(e);
 		}
 	}
 
@@ -820,7 +820,7 @@ public class PlaybackController: MonoBehaviour
 	{
 		if (VideoConfig == null)
 		{
-			Log.Warn("VideoConfig null in PlayVideo");
+			Plugin.Log.Warn("VideoConfig null in PlayVideo");
 			return;
 		}
 
@@ -858,7 +858,7 @@ public class PlaybackController: MonoBehaviour
 		if ((songSpeed * VideoConfig.PlaybackSpeed) < 1f && totalOffset > 0f)
 		{
 			//Unity crashes if the playback speed is less than 1 and the video time at the start of playback is greater than 0
-			Log.Warn("Video playback disabled to prevent Unity crash");
+			Plugin.Log.Warn("Video playback disabled to prevent Unity crash");
 			VideoPlayer.Hide();
 			StopPlayback();
 			VideoConfig = null;
@@ -886,10 +886,10 @@ public class PlaybackController: MonoBehaviour
 		if (Math.Abs(totalOffset) < 0.001f)
 		{
 			totalOffset = 0;
-			Log.Debug("Set very small offset to 0");
+			Plugin.Log.Debug("Set very small offset to 0");
 		}
 
-		Log.Debug($"Total offset: {totalOffset}, startTime: {startTime}, songSpeed: {songSpeed}, player time: {VideoPlayer.Player.time}");
+		Plugin.Log.Debug($"Total offset: {totalOffset}, startTime: {startTime}, songSpeed: {songSpeed}, player time: {VideoPlayer.Player.time}");
 
 		StopAllCoroutines();
 
@@ -929,7 +929,7 @@ public class PlaybackController: MonoBehaviour
 	//TODO Using a stopwatch will not work properly when seeking in the map (e.g. IntroSkip, PracticePlugin)
 	private IEnumerator PlayVideoDelayedCoroutine(float delayStartTime)
 	{
-		Log.Debug("Waiting for "+delayStartTime+" seconds before playing video");
+		Plugin.Log.Debug("Waiting for "+delayStartTime+" seconds before playing video");
 		_playbackDelayStopwatch ??= new Stopwatch();
 		_playbackDelayStopwatch.Start();
 		VideoPlayer.Pause();
@@ -937,7 +937,7 @@ public class PlaybackController: MonoBehaviour
 		VideoPlayer.Player.time = 0;
 		var ticksUntilStart = (delayStartTime) * TimeSpan.TicksPerSecond;
 		yield return new WaitUntil(() => _playbackDelayStopwatch.ElapsedTicks >= ticksUntilStart);
-		Log.Debug("Elapsed ms: "+_playbackDelayStopwatch.ElapsedMilliseconds);
+		Plugin.Log.Debug("Elapsed ms: "+_playbackDelayStopwatch.ElapsedMilliseconds);
 		_playbackDelayStopwatch.Stop();
 		_playbackDelayStopwatch.Reset();
 
@@ -972,7 +972,7 @@ public class PlaybackController: MonoBehaviour
 		VideoPlayer.Pause();
 		if (VideoConfig.DownloadState != DownloadState.Downloaded)
 		{
-			Log.Debug("Video is not downloaded, stopping prepare");
+			Plugin.Log.Debug("Video is not downloaded, stopping prepare");
 			VideoPlayer.FadeOut();
 			yield break;
 		}
@@ -983,11 +983,11 @@ public class PlaybackController: MonoBehaviour
 
 		if (video.VideoPath == null)
 		{
-			Log.Debug("Video path was null, stopping prepare");
+			Plugin.Log.Debug("Video path was null, stopping prepare");
 			yield break;
 		}
 		var videoPath = video.VideoPath;
-		Log.Info($"Loading video: {videoPath}");
+		Plugin.Log.Info($"Loading video: {videoPath}");
 
 		if (video.videoFile != null)
 		{
@@ -1002,7 +1002,7 @@ public class PlaybackController: MonoBehaviour
 			timeout.Stop();
 			if (timeout.HasTimedOut && Util.IsFileLocked(videoFileInfo))
 			{
-				Log.Warn("Video file locked: "+videoPath);
+				Plugin.Log.Warn("Video file locked: "+videoPath);
 			}
 		}
 
@@ -1015,7 +1015,7 @@ public class PlaybackController: MonoBehaviour
 		if (_offsetAfterPrepare > 0)
 		{
 			var offset = (DateTime.Now - _audioSourceStartTime).TotalSeconds + _offsetAfterPrepare;
-			Log.Debug($"Adjusting offset after prepare to {offset}");
+			Plugin.Log.Debug($"Adjusting offset after prepare to {offset}");
 			VideoPlayer.Player.time = offset;
 		}
 		_offsetAfterPrepare = 0;
@@ -1047,7 +1047,7 @@ public class PlaybackController: MonoBehaviour
 		_lastKnownAudioSourceTime = 0;
 		if (_activeAudioSource == null)
 		{
-			Log.Debug("Active AudioSource null in SongPreviewPlayer update");
+			Plugin.Log.Debug("Active AudioSource null in SongPreviewPlayer update");
 		}
 
 		if (IsPreviewPlaying)
@@ -1058,7 +1058,7 @@ public class PlaybackController: MonoBehaviour
 				return;
 			}
 			_previewWaitingForPreviewPlayer = true;
-			Log.Debug($"Ignoring SongPreviewPlayer update");
+			Plugin.Log.Debug($"Ignoring SongPreviewPlayer update");
 			return;
 		}
 
@@ -1068,7 +1068,7 @@ public class PlaybackController: MonoBehaviour
 			VideoPlayer.FadeOut();
 			_previewWaitingForPreviewPlayer = true;
 
-			Log.Debug("SongPreviewPlayer reverting to default loop");
+			Plugin.Log.Debug("SongPreviewPlayer reverting to default loop");
 			return;
 		}
 
@@ -1078,7 +1078,7 @@ public class PlaybackController: MonoBehaviour
 			StopPreview(true);
 			VideoPlayer.FadeOut();
 
-			Log.Debug("Unexpected SongPreviewPlayer update, ignoring.");
+			Plugin.Log.Debug("Unexpected SongPreviewPlayer update, ignoring.");
 			return;
 		}
 
@@ -1089,7 +1089,7 @@ public class PlaybackController: MonoBehaviour
 
 		if (_currentLevel != null && _currentLevel.songDuration < startTime)
 		{
-			Log.Debug("Song preview start time was greater than song duration. Resetting start time to 0");
+			Plugin.Log.Debug("Song preview start time was greater than song duration. Resetting start time to 0");
 			startTime = 0;
 		}
 
@@ -1120,7 +1120,7 @@ public class PlaybackController: MonoBehaviour
 		var delay = DateTime.Now.Subtract(_previewSyncStartTime);
 		var delaySeconds = (float) delay.TotalSeconds;
 
-		Log.Debug($"Starting song preview playback with a delay of {delaySeconds}");
+		Plugin.Log.Debug($"Starting song preview playback with a delay of {delaySeconds}");
 
 		var timeRemaining = _previewTimeRemaining - delaySeconds;
 		if (timeRemaining > 1 || _previewTimeRemaining == 0)
@@ -1129,7 +1129,7 @@ public class PlaybackController: MonoBehaviour
 		}
 		else
 		{
-			Log.Debug($"Not playing song preview, because delay was too long. Remaining preview time: {_previewTimeRemaining}");
+			Plugin.Log.Debug($"Not playing song preview, because delay was too long. Remaining preview time: {_previewTimeRemaining}");
 		}
 	}
 }

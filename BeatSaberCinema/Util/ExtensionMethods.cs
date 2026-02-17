@@ -58,8 +58,8 @@ public static class ExtensionMethods
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Exception thrown in '{eventName}' handler '{handler.Method.Name}': {ex.Message}");
-				Log.Debug(ex);
+				Plugin.Log.Error($"Exception thrown in '{eventName}' handler '{handler.Method.Name}': {ex.Message}");
+				Plugin.Log.Debug(ex);
 			}
 		}
 	}

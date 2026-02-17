@@ -44,17 +44,17 @@ public class StandardLevelDetailViewRefreshContent
 
 			if (PlaybackController.Instance.VideoConfig?.IsPlayable == true || PlaybackController.Instance.VideoConfig?.forceEnvironmentModifications == true)
 			{
-				Log.Debug("Requirement fulfilled");
+				Plugin.Log.Debug("Requirement fulfilled");
 				return;
 			}
 
-			Log.Info("Cinema requirement not met for "+__instance._beatmapLevel.songName);
+			Plugin.Log.Info("Cinema requirement not met for "+__instance._beatmapLevel.songName);
 			__instance._actionButton.interactable = false;
 			__instance._practiceButton.interactable = false;
 		}
 		catch (Exception e)
 		{
-			Log.Error(e);
+			Plugin.Log.Error(e);
 		}
 	}
 }

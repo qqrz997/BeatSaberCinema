@@ -31,7 +31,7 @@ public class SettingsFlowCoordinator: FlowCoordinator
 		}
 		catch (Exception ex)
 		{
-			BeatSaberCinema.Log.Error(ex);
+			BeatSaberCinema.Plugin.Log.Error(ex);
 		}
 	}
 

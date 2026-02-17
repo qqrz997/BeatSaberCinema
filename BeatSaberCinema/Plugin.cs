@@ -1,4 +1,5 @@
 using System.IO;
+using BeatSaberCinema.Installers;
 using BS_Utils.Utilities;
 using IPA;
 using IPA.Config.Stores;
@@ -6,135 +7,138 @@ using IPA.Logging;
 using IPA.Utilities;
 using IPA.Utilities.Async;
 using JetBrains.Annotations;
+using SiraUtil.Zenject;
 using SongCore;
 using Zenject;
 using Config = IPA.Config.Config;
 
-namespace BeatSaberCinema
+namespace BeatSaberCinema;
+
+[Plugin(RuntimeOptions.DynamicInit)]
+[UsedImplicitly]
+internal class Plugin
 {
-	[Plugin(RuntimeOptions.DynamicInit)]
-	[UsedImplicitly]
-	public class Plugin
+	public static Logger Log { get; private set; } = null!; // Set in [Init]
+
+	internal const string CAPABILITY = "Cinema";
+	private HarmonyPatchController? _harmonyPatchController;
+	private static bool _enabled;
+	private static bool _filterAdded;
+
+	internal static DiContainer menuContainer = null!;
+	internal static DiContainer gameCoreContainer = null!;
+
+	public static bool Enabled
 	{
-		internal const string CAPABILITY = "Cinema";
-		private HarmonyPatchController? _harmonyPatchController;
-		private static bool _enabled;
-		private static bool _filterAdded;
+		get => _enabled && SettingsStore.Instance.PluginEnabled;
+		private set => _enabled = value;
+	}
 
-		internal static DiContainer menuContainer = null!;
-		internal static DiContainer gameCoreContainer = null!;
+	public Plugin(Logger logger, Config config, Zenjector zenjector)
+	{
+		Log = logger;
+		zenjector.UseLogger(logger);
+		SettingsStore.Instance = config.Generated<SettingsStore>();
+		zenjector.Install<AppInstaller>(Location.App, SettingsStore.Instance);
+		zenjector.Install<MenuInstaller>(Location.Menu);
+		zenjector.Install<PlayerInstaller>(Location.Player);
+	}
 
-		public static bool Enabled
+	[OnStart]
+	[UsedImplicitly]
+	public void OnApplicationStart()
+	{
+		Plugin.Log.Debug("Hardware info:\n"+Util.GetHardwareInfo());
+		BSEvents.OnLoad();
+		UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
 		{
-			get => _enabled && SettingsStore.Instance.PluginEnabled;
-			private set => _enabled = value;
-		}
+			await VideoLoader.Init();
+		});
+	}
 
-		[Init]
-		[UsedImplicitly]
-		public void Init(Logger ipaLogger, Config config)
+	private static void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO scenesTransition)
+	{
+		PlaybackController.Create();
+
+		if (VideoMenu.Instance != null)
 		{
-			Log.IpaLogger = ipaLogger;
-			SettingsStore.Instance = config.Generated<SettingsStore>();
-			Log.Debug("Plugin initialized");
-		}
-
-		[OnStart]
-		[UsedImplicitly]
-		public void OnApplicationStart()
-		{
-			Log.Debug("Hardware info:\n"+Util.GetHardwareInfo(), true);
-			BSEvents.OnLoad();
-			UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
-			{
-				await VideoLoader.Init();
-			});
-		}
-
-		private static void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO scenesTransition)
-		{
-			PlaybackController.Create();
-
-			if (VideoMenu.Instance != null)
-			{
-				VideoMenu.RemoveTab();
-			}
-			VideoMenu.AddTab();
-
-			SettingsUI.CreateMenu();
-			SongPreviewPlayerController.Init();
-			AddBetterSongListFilter();
-		}
-
-		[OnEnable]
-		[UsedImplicitly]
-		public void OnEnable()
-		{
-			Enabled = true;
-			BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoadedFresh;
-			_harmonyPatchController = new HarmonyPatchController();
-			ApplyHarmonyPatches();
-			EnvironmentController.Init();
-			Collections.RegisterCapability(CAPABILITY);
-			if (File.Exists(Path.Combine(UnityGame.InstallPath, "dxgi.dll")))
-			{
-				Log.Warn("dxgi.dll is present, video may fail to play. To fix this, delete the file dxgi.dll from your main Beat Saber folder (not in Plugins).");
-			}
-
-			//No need to index maps if the filter isn't going to be applied anyway
-			if (InstalledMods.BetterSongList)
-			{
-				Loader.SongsLoadedEvent += VideoLoader.IndexMaps;
-			}
-		}
-
-		[OnDisable]
-		[UsedImplicitly]
-		public void OnDisable()
-		{
-			Enabled = false;
-			BSEvents.lateMenuSceneLoadedFresh -= OnMenuSceneLoadedFresh;
-			Loader.SongsLoadedEvent -= VideoLoader.IndexMaps;
-			RemoveHarmonyPatches();
-			_harmonyPatchController = null;
-			SettingsUI.RemoveMenu();
-
-			//TODO Destroying and re-creating the PlaybackController messes up the VideoMenu without any exceptions in the log. Investigate.
-			//PlaybackController.Destroy();
-
 			VideoMenu.RemoveTab();
-			EnvironmentController.Disable();
-			VideoLoader.StopFileSystemWatcher();
-			Collections.DeregisterCapability(CAPABILITY);
+		}
+		VideoMenu.AddTab();
+
+		SettingsUI.CreateMenu();
+		SongPreviewPlayerController.Init();
+		AddBetterSongListFilter();
+	}
+
+	[OnEnable]
+	[UsedImplicitly]
+	public void OnEnable()
+	{
+		Enabled = true;
+		BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoadedFresh;
+		_harmonyPatchController = new HarmonyPatchController();
+		ApplyHarmonyPatches();
+		EnvironmentController.Init();
+		Collections.RegisterCapability(CAPABILITY);
+		if (File.Exists(Path.Combine(UnityGame.InstallPath, "dxgi.dll")))
+		{
+			Plugin.Log.Warn("dxgi.dll is present, video may fail to play. To fix this, delete the file dxgi.dll from your main Beat Saber folder (not in Plugins).");
 		}
 
-		private void ApplyHarmonyPatches()
+		//No need to index maps if the filter isn't going to be applied anyway
+		if (InstalledMods.BetterSongList)
 		{
-			_harmonyPatchController?.PatchAll();
+			Loader.SongsLoadedEvent += VideoLoader.IndexMaps;
+		}
+	}
+
+	[OnDisable]
+	[UsedImplicitly]
+	public void OnDisable()
+	{
+		Enabled = false;
+		BSEvents.lateMenuSceneLoadedFresh -= OnMenuSceneLoadedFresh;
+		Loader.SongsLoadedEvent -= VideoLoader.IndexMaps;
+		RemoveHarmonyPatches();
+		_harmonyPatchController = null;
+		SettingsUI.RemoveMenu();
+
+		//TODO Destroying and re-creating the PlaybackController messes up the VideoMenu without any exceptions in the Plugin.Log. Investigate.
+		//PlaybackController.Destroy();
+
+		VideoMenu.RemoveTab();
+		EnvironmentController.Disable();
+		VideoLoader.StopFileSystemWatcher();
+		Collections.DeregisterCapability(CAPABILITY);
+	}
+
+	private void ApplyHarmonyPatches()
+	{
+		_harmonyPatchController?.PatchAll();
+	}
+
+	private void RemoveHarmonyPatches()
+	{
+		_harmonyPatchController?.UnpatchAll();
+	}
+
+	private static void AddBetterSongListFilter()
+	{
+		if (!InstalledMods.BetterSongList || _filterAdded)
+		{
+			return;
 		}
 
-		private void RemoveHarmonyPatches()
+		_filterAdded = BetterSongList.FilterMethods.Register(new HasVideoFilter());
+
+		if (_filterAdded)
 		{
-			_harmonyPatchController?.UnpatchAll();
+			Plugin.Log.Debug($"Registered {nameof(HasVideoFilter)}");
 		}
-
-		private static void AddBetterSongListFilter()
+		else
 		{
-			if (!InstalledMods.BetterSongList || _filterAdded)
-			{
-				return;
-			}
-
-			_filterAdded = BetterSongList.FilterMethods.Register(new HasVideoFilter());
-
-			if (_filterAdded)
-			{
-				Log.Debug($"Registered {nameof(HasVideoFilter)}");
-			}
-			else
-			{
-				Log.Error($"Failed to register {nameof(HasVideoFilter)}");
-			}
+			Plugin.Log.Error($"Failed to register {nameof(HasVideoFilter)}");
 		}
 	}
 }

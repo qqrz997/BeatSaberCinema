@@ -69,7 +69,7 @@ public static class VideoLoader
 
 	internal static async void IndexMaps(Loader? loader = null, ConcurrentDictionary<string, BeatmapLevel>? beatmapLevels = null)
 	{
-		Log.Debug("Indexing maps...");
+		Plugin.Log.Debug("Indexing maps...");
 		var stopwatch = new Stopwatch();
 		stopwatch.Start();
 
@@ -90,7 +90,7 @@ public static class VideoLoader
 		loadingTask.Start();
 		await loadingAwaiter;
 
-		Log.Debug($"Indexing took {stopwatch.ElapsedMilliseconds} ms");
+		Plugin.Log.Debug($"Indexing took {stopwatch.ElapsedMilliseconds} ms");
 	}
 
 	private static List<BeatmapLevel> GetOfficialMaps()
@@ -139,7 +139,7 @@ public static class VideoLoader
 		MapsWithVideo.TryAdd(level.levelID, 0);
 		if (success)
 		{
-			Log.Debug($"Adding config for {level.levelID} to cache");
+			Plugin.Log.Debug($"Adding config for {level.levelID} to cache");
 		}
 	}
 
@@ -148,7 +148,7 @@ public static class VideoLoader
 		var success = CachedConfigs.TryRemove(level.levelID, out _);
 		if (success)
 		{
-			Log.Debug($"Removing config for {level.levelID} from cache");
+			Plugin.Log.Debug($"Removing config for {level.levelID} from cache");
 		}
 	}
 
@@ -157,7 +157,7 @@ public static class VideoLoader
 		var success = CachedConfigs.TryGetValue(level.levelID, out var config);
 		if (success)
 		{
-			Log.Debug($"Loading config for {level.levelID} from cache");
+			Plugin.Log.Debug($"Loading config for {level.levelID} from cache");
 		}
 		return config;
 	}
@@ -169,19 +169,19 @@ public static class VideoLoader
 
 		if (config == null)
 		{
-			Log.Debug($"No bundled config found for {levelID}");
+			Plugin.Log.Debug($"No bundled config found for {levelID}");
 			return null;
 		}
 
 		config.LevelDir = GetLevelPath(level);
 		config.bundledConfig = true;
-		Log.Debug("Loaded from bundled configs");
+		Plugin.Log.Debug("Loaded from bundled configs");
 		return config;
 	}
 
 	public static void StopFileSystemWatcher()
 	{
-		Log.Debug("Disposing FileSystemWatcher");
+		Plugin.Log.Debug("Disposing FileSystemWatcher");
 		_fileSystemWatcher?.Dispose();
 	}
 
@@ -207,12 +207,12 @@ public static class VideoLoader
 			}
 			else
 			{
-				Log.Debug($"Level directory {levelPath} does not exist");
+				Plugin.Log.Debug($"Level directory {levelPath} does not exist");
 				return;
 			}
 		}
 
-		Log.Debug($"Setting up FileSystemWatcher for {levelPath}");
+		Plugin.Log.Debug($"Setting up FileSystemWatcher for {levelPath}");
 
 		_fileSystemWatcher = new FileSystemWatcher();
 		var configPath = GetConfigPath(levelPath);
@@ -233,10 +233,10 @@ public static class VideoLoader
 
 	private static void OnConfigChangedMainThread(FileSystemEventArgs e)
 	{
-		Log.Debug("Config "+e.ChangeType+" detected: "+e.FullPath);
+		Plugin.Log.Debug("Config "+e.ChangeType+" detected: "+e.FullPath);
 		if (_ignoreNextEventForPath == e.FullPath && !Util.IsInEditor())
 		{
-			Log.Debug("Ignoring event after saving");
+			Plugin.Log.Debug("Ignoring event after saving");
 			_ignoreNextEventForPath = null;
 			return;
 		}
@@ -275,7 +275,7 @@ public static class VideoLoader
 		var beatmapLevelLoader = (BeatmapLevelLoader)BeatmapLevelsModel.levelLoader;
 		if (beatmapLevelLoader._loadedBeatmapLevelDataCache.TryGetFromCache(level.levelID, out var beatmapLevelData))
 		{
-			Log.Debug("Getting audio clip from async cache");
+			Plugin.Log.Debug("Getting audio clip from async cache");
 			return await _audioClipAsyncLoader.LoadSong(beatmapLevelData);
 		}
 
@@ -287,7 +287,7 @@ public static class VideoLoader
 		var loaderTask = AudioClipAsyncLoader.LoadPreview(level);
 		if (loaderTask == null)
 		{
-			Log.Error("AudioClipAsyncLoader.LoadPreview() failed");
+			Plugin.Log.Error("AudioClipAsyncLoader.LoadPreview() failed");
 			return null;
 		}
 
@@ -303,7 +303,7 @@ public static class VideoLoader
 	{
 		if (!Directory.Exists(originalPath))
 		{
-			Log.Debug($"Path does not exist: {originalPath}");
+			Plugin.Log.Debug($"Path does not exist: {originalPath}");
 			return null;
 		}
 
@@ -348,7 +348,7 @@ public static class VideoLoader
 		}
 		else
 		{
-			Log.Debug($"Path does not exist: {levelPath}");
+			Plugin.Log.Debug($"Path does not exist: {levelPath}");
 		}
 
 		if (InstalledMods.BeatSaberPlaylistsLib && videoConfig == null && level.TryGetPlaylistLevelConfig(levelPath, out var playlistConfig))
@@ -375,7 +375,7 @@ public static class VideoLoader
 	{
 		if (videoConfig.LevelDir == null || videoConfig.ConfigPath == null || !Directory.Exists(videoConfig.LevelDir))
 		{
-			Log.Warn("Failed to save video. Path "+videoConfig.LevelDir+" does not exist.");
+			Plugin.Log.Warn("Failed to save video. Path "+videoConfig.LevelDir+" does not exist.");
 			return;
 		}
 
@@ -391,7 +391,7 @@ public static class VideoLoader
 	public static void SaveVideoConfigToPath(VideoConfig config, string configPath)
 	{
 		_ignoreNextEventForPath = configPath;
-		Log.Info($"Saving video config to {configPath}");
+		Plugin.Log.Info($"Saving video config to {configPath}");
 
 		try
 		{
@@ -400,17 +400,17 @@ public static class VideoLoader
 		}
 		catch (Exception e)
 		{
-			Log.Error("Failed to save level data: ");
-			Log.Error(e);
+			Plugin.Log.Error("Failed to save level data: ");
+			Plugin.Log.Error(e);
 		}
 
 		if (!File.Exists(configPath))
 		{
-			Log.Error("Config file doesn't exist after saving!");
+			Plugin.Log.Error("Config file doesn't exist after saving!");
 		}
 		else
 		{
-			Log.Debug("Config save successful");
+			Plugin.Log.Debug("Config save successful");
 		}
 	}
 
@@ -418,14 +418,14 @@ public static class VideoLoader
 	{
 		if (videoConfig.VideoPath == null)
 		{
-			Log.Warn("Tried to delete video, but its path was null");
+			Plugin.Log.Warn("Tried to delete video, but its path was null");
 			return;
 		}
 
 		try
 		{
 			File.Delete(videoConfig.VideoPath);
-			Log.Info("Deleted video at "+videoConfig.VideoPath);
+			Plugin.Log.Info("Deleted video at "+videoConfig.VideoPath);
 			if (videoConfig.DownloadState != DownloadState.Cancelled)
 			{
 				videoConfig.DownloadState = DownloadState.NotDownloaded;
@@ -435,8 +435,8 @@ public static class VideoLoader
 		}
 		catch (Exception e)
 		{
-			Log.Error("Failed to delete video at "+videoConfig.VideoPath);
-			Log.Error(e);
+			Plugin.Log.Error("Failed to delete video at "+videoConfig.VideoPath);
+			Plugin.Log.Error(e);
 		}
 	}
 
@@ -444,7 +444,7 @@ public static class VideoLoader
 	{
 		if (videoConfig.LevelDir == null)
 		{
-			Log.Error("LevelDir was null when trying to delete config");
+			Plugin.Log.Error("LevelDir was null when trying to delete config");
 			return false;
 		}
 
@@ -466,12 +466,12 @@ public static class VideoLoader
 		}
 		catch (Exception e)
 		{
-			Log.Error("Failed to delete video config:");
-			Log.Error(e);
+			Plugin.Log.Error("Failed to delete video config:");
+			Plugin.Log.Error(e);
 		}
 
 		RemoveConfigFromCache(level);
-		Log.Info("Deleted video config");
+		Plugin.Log.Info("Deleted video config");
 
 		return true;
 	}
@@ -493,7 +493,7 @@ public static class VideoLoader
 				var videoConfigListBackCompat = JsonConvert.DeserializeObject<VideoConfigListBackCompat>(json);
 				if (videoConfigListBackCompat == null)
 				{
-					Log.Warn($"Deserializing video config at {configPath} failed");
+					Plugin.Log.Warn($"Deserializing video config at {configPath} failed");
 					return null;
 				}
 				videoConfig = new VideoConfig(videoConfigListBackCompat);
@@ -505,8 +505,8 @@ public static class VideoLoader
 		}
 		catch (Exception e)
 		{
-			Log.Error($"Error parsing video json {configPath}:");
-			Log.Error(e);
+			Plugin.Log.Error($"Error parsing video json {configPath}:");
+			Plugin.Log.Error(e);
 			return null;
 		}
 
@@ -518,7 +518,7 @@ public static class VideoLoader
 		}
 		else
 		{
-			Log.Warn($"Deserializing video config at {configPath} failed");
+			Plugin.Log.Warn($"Deserializing video config at {configPath} failed");
 		}
 
 		return videoConfig;
@@ -531,7 +531,7 @@ public static class VideoLoader
 		var configs = JsonConvert.DeserializeObject<BundledConfig[]>(jsonString);
 		if (configs == null)
 		{
-			Log.Error("Failed to deserialize bundled configs");
+			Plugin.Log.Error("Failed to deserialize bundled configs");
 			return Enumerable.Empty<BundledConfig>();
 		}
 		return configs;

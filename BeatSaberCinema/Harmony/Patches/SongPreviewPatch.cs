@@ -20,7 +20,7 @@ public class SongPreviewPatch
 		}
 		catch (Exception e)
 		{
-			Log.Error(e);
+			Plugin.Log.Error(e);
 		}
 	}
 }

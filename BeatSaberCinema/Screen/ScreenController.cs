@@ -62,7 +62,7 @@ public class ScreenController
 			var bodyRenderer = body.GetComponent<Renderer>();
 			if (bodyRenderer == null)
 			{
-				Log.Error("Could not find body renderer for screen");
+				Plugin.Log.Error("Could not find body renderer for screen");
 				return;
 			}
 
@@ -79,7 +79,7 @@ public class ScreenController
 		if (bodyShader != null)
 		{
 			bodyRenderer.material = new Material(bodyShader);
-			Log.Debug("Assigned body shader: "+bodyShader.name);
+			Plugin.Log.Debug("Assigned body shader: "+bodyShader.name);
 		}
 		else
 		{
@@ -87,11 +87,11 @@ public class ScreenController
 			if (shader != null)
 			{
 				bodyRenderer.material = new Material(shader);
-				Log.Debug("Assigned body shader: "+shader.name);
+				Plugin.Log.Debug("Assigned body shader: "+shader.name);
 			}
 			else
 			{
-				Log.Error("Could not find body shader");
+				Plugin.Log.Error("Could not find body shader");
 			}
 		}
 
@@ -261,7 +261,7 @@ public class ScreenController
 
 	public void EnableColorBlending(bool enable)
 	{
-		Log.Debug("Enabling color blending: "+enable);
+		Plugin.Log.Debug("Enabling color blending: "+enable);
 		var screenRenderer = Screens[0].GetComponent<Renderer>();
 		SetBlendMode(enable ? BlendMode.SoftAdditive : BlendMode.PerfectVisibility, screenRenderer.material);
 	}
@@ -288,7 +288,7 @@ public class ScreenController
 				throw new ArgumentOutOfRangeException(nameof(blendMode), blendMode, null);
 		}
 
-		Log.Debug("Set blend mode to " + blendMode);
+		Plugin.Log.Debug("Set blend mode to " + blendMode);
 	}
 
 	private enum BlendMode

@@ -89,7 +89,7 @@ public class LightController : MonoBehaviour
 		}
 		catch (Exception e)
 		{
-			Log.Error(e);
+			Plugin.Log.Error(e);
 		}
 	}
 
@@ -136,7 +136,7 @@ public class LightController : MonoBehaviour
 		}
 		catch (Exception e)
 		{
-			Log.Error(e);
+			Plugin.Log.Error(e);
 		}
 	}
 

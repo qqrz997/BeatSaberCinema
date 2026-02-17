@@ -35,7 +35,7 @@ internal class CustomBloomPrePass : MonoBehaviour
 		_kawaseBlurRenderer = Resources.FindObjectsOfTypeAll<KawaseBlurRendererSO>().FirstOrDefault();
 		if (_kawaseBlurRenderer == null)
 		{
-			Log.Error("KawaseBlurRendererSO not found!");
+			Plugin.Log.Error("KawaseBlurRendererSO not found!");
 		}
 		else
 		{
@@ -134,7 +134,7 @@ internal class CustomBloomPrePass : MonoBehaviour
 		}
 		catch (Exception e)
 		{
-			Log.Error(e);
+			Plugin.Log.Error(e);
 			var result = _bloomPrePassDict.TryGetValue(camera, out var bloomPrePass);
 			if (result == false)
 			{
@@ -168,7 +168,7 @@ internal class CustomBloomPrePass : MonoBehaviour
 		}
 		catch (Exception e)
 		{
-			Log.Error(e);
+			Plugin.Log.Error(e);
 			if (!_bloomPrePassDict.ContainsKey(camera))
 			{
 				_bloomPrePassDict.Add(camera, null);
@@ -239,7 +239,7 @@ internal class CustomBloomPrePass : MonoBehaviour
 		_kawaseBlurRenderer = Resources.FindObjectsOfTypeAll<KawaseBlurRendererSO>().FirstOrDefault();
 		if (_kawaseBlurRenderer == null)
 		{
-			Log.Error("KawaseBlurRendererSO not found!");
+			Plugin.Log.Error("KawaseBlurRendererSO not found!");
 		}
 		else
 		{

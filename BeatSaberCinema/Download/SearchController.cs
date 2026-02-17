@@ -36,7 +36,7 @@ public class SearchController : YoutubeDLController
 		}
 
 		SearchResults.Clear();
-		Log.Debug($"Starting search with query {query}");
+		Plugin.Log.Debug($"Starting search with query {query}");
 
 		var searchProcessArguments = $"\"ytsearch{expectedResultCount}:{query}\"" +
 		                             " -j" + //Instructs yt-dl to return json data without downloading anything
@@ -53,7 +53,7 @@ public class SearchController : YoutubeDLController
 		_searchProcess.Exited += (sender, e) =>
 			UnityMainThreadTaskScheduler.Factory.StartNew(delegate { SearchProcessExited(((Process) sender).ExitCode); });
 
-		Log.Info($"Starting youtube-dl process with arguments: \"{_searchProcess.StartInfo.FileName}\" {_searchProcess.StartInfo.Arguments}");
+		Plugin.Log.Info($"Starting youtube-dl process with arguments: \"{_searchProcess.StartInfo.FileName}\" {_searchProcess.StartInfo.Arguments}");
 		StartProcessThreaded(_searchProcess);
 		var startProcessTimeout = new Timeout(10);
 		yield return new WaitUntil(() => IsProcessRunning(_searchProcess) || startProcessTimeout.HasTimedOut);
@@ -74,8 +74,8 @@ public class SearchController : YoutubeDLController
 			return;
 		}
 
-		Log.Error("youtube-dl process error:");
-		Log.Error(e.Data);
+		Plugin.Log.Error("youtube-dl process error:");
+		Plugin.Log.Error(e.Data);
 	}
 
 	private void SearchProcessDataReceived(DataReceivedEventArgs e)
@@ -88,13 +88,13 @@ public class SearchController : YoutubeDLController
 
 		if (output.Contains("yt command exited"))
 		{
-			Log.Debug("Done with Youtube Search, Processing...");
+			Plugin.Log.Debug("Done with Youtube Search, Processing...");
 			return;
 		}
 
 		if (output.Contains("yt command"))
 		{
-			Log.Debug($"Running with {output}");
+			Plugin.Log.Debug($"Running with {output}");
 			return;
 		}
 
@@ -113,13 +113,13 @@ public class SearchController : YoutubeDLController
 	{
 		if (!(JsonConvert.DeserializeObject(searchResultJson) is JObject result))
 		{
-			Log.Error("Failed to deserialize " + searchResultJson);
+			Plugin.Log.Error("Failed to deserialize " + searchResultJson);
 			return null;
 		}
 
 		if (result["id"] == null)
 		{
-			Log.Warn("YT search result had no ID, skipping");
+			Plugin.Log.Warn("YT search result had no ID, skipping");
 			return null;
 		}
 
@@ -129,7 +129,7 @@ public class SearchController : YoutubeDLController
 
 	private void SearchProcessExited(int exitCode)
 	{
-		Log.Info($"Search process exited with exitcode {exitCode}");
+		Plugin.Log.Info($"Search process exited with exitcode {exitCode}");
 		SearchFinished?.Invoke();
 		DisposeProcess(_searchProcess);
 		_searchProcess = null;

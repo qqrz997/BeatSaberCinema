@@ -31,19 +31,19 @@ public static class SongPreviewPlayerController
 	{
 		if (_currentAudioClip == null)
 		{
-			Log.Warn("SongPreviewPlayer AudioClip was null");
+			Plugin.Log.Warn("SongPreviewPlayer AudioClip was null");
 			return;
 		}
 
 		if (AudioSourceControllers == null)
 		{
-			Log.Warn("Audiosources null in when updating playback controller");
+			Plugin.Log.Warn("Audiosources null in when updating playback controller");
 			return;
 		}
 
 		if (_activeChannel < 0 || _activeChannel > (_channelCount-1))
 		{
-			Log.Warn($"No SongPreviewPlayer audio channel active ({_activeChannel})");
+			Plugin.Log.Warn($"No SongPreviewPlayer audio channel active ({_activeChannel})");
 			return;
 		}
 
@@ -54,7 +54,7 @@ public static class SongPreviewPlayerController
 		}
 
 		_activeAudioSource = AudioSourceControllers[_activeChannel].audioSource;
-		Log.Debug($"SongPreviewPatch -- channel {_activeChannel} -- startTime {startTime} -- timeRemaining {timeToDefault} -- audioclip {_currentAudioClip.name}");
+		Plugin.Log.Debug($"SongPreviewPatch -- channel {_activeChannel} -- startTime {startTime} -- timeRemaining {timeToDefault} -- audioclip {_currentAudioClip.name}");
 		if (PlaybackController.Instance != null)
 		{
 			PlaybackController.Instance.UpdateSongPreviewPlayer(_activeAudioSource, startTime, timeToDefault, isDefault);

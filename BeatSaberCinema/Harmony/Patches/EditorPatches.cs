@@ -22,7 +22,7 @@ public class EditorSelectionPatch
 			Events.SetSelectedLevel(__instance._beatmapDataModel, originalPath);
 		} catch (System.Exception e)
 		{
-			Log.Error(e);
+			Plugin.Log.Error(e);
 			Events.SetSelectedLevel(null);
 		}
 	}
@@ -78,13 +78,13 @@ public class SavingFixPatch
 
 		VideoLoader.StopFileSystemWatcher();
 		var config = PlaybackController.Instance.VideoConfig;
-		Log.Info("Editor is creating backup, path: "+config.ConfigPath);
+		Plugin.Log.Info("Editor is creating backup, path: "+config.ConfigPath);
 		if (File.Exists(config.ConfigPath))
 		{
 			return;
 		}
 
-		Log.Info("Restoring config...");
+		Plugin.Log.Info("Restoring config...");
 		VideoLoader.SaveVideoConfig(config);
 	}
 }
@@ -100,6 +100,6 @@ public class RestoreConfigPatch
 			return;
 		}
 
-		Log.Debug("Editor save complete");
+		Plugin.Log.Debug("Editor save complete");
 	}
 }

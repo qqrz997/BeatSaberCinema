@@ -98,7 +98,7 @@ public class VideoMenu
 
 		if (_root == null)
 		{
-			Log.Debug("RootObject is null!");
+			Plugin.Log.Debug("RootObject is null!");
 			return;
 		}
 
@@ -131,7 +131,7 @@ public class VideoMenu
 
 		if (!_downloadController.LibrariesAvailable())
 		{
-			Log.Warn($"One or more of the libraries are missing. Downloading videos will not work. To fix this, reinstall Cinema and make sure yt-dlp and ffmpeg are in the Libs folder of Beat Saber, which is located at {UnityGame.LibraryPath}.");
+			Plugin.Log.Warn($"One or more of the libraries are missing. Downloading videos will not work. To fix this, reinstall Cinema and make sure yt-dlp and ffmpeg are in the Libs folder of Beat Saber, which is located at {UnityGame.LibraryPath}.");
 		}
 	}
 
@@ -146,7 +146,7 @@ public class VideoMenu
 		}
 
 		_menuStatus = _root.AddComponent<VideoMenuStatus>();
-		Log.Debug("Adding status listener to: " + _menuStatus.name);
+		Plugin.Log.Debug("Adding status listener to: " + _menuStatus.name);
 		_menuStatus.DidEnable += StatusViewerDidEnable;
 		_menuStatus.DidDisable += StatusViewerDidDisable;
 	}
@@ -155,18 +155,18 @@ public class VideoMenu
 	{
 		if (Instance == null)
 		{
-			Log.Debug("Initializing VideoMenu");
+			Plugin.Log.Debug("Initializing VideoMenu");
 			Instance = new VideoMenu();
 			Instance.Init();
 		}
 
-		Log.Debug("Adding tab");
+		Plugin.Log.Debug("Adding tab");
 		GameplaySetup.Instance.AddTab("Cinema", "BeatSaberCinema.VideoMenu.Views.video-menu.bsml", Instance, MenuType.All);
 	}
 
 	public static void RemoveTab()
 	{
-		Log.Debug("Removing tab");
+		Plugin.Log.Debug("Removing tab");
 		GameplaySetup.Instance.RemoveTab("Cinema");
 		Instance = null;
 	}
@@ -276,7 +276,7 @@ public class VideoMenu
 	{
 		if (_videoSearchResultsViewRect == null)
 		{
-			Log.Warn("Video search results view rect is null, skipping UI setup");
+			Plugin.Log.Warn("Video search results view rect is null, skipping UI setup");
 			return;
 		}
 
@@ -286,7 +286,7 @@ public class VideoMenu
 		if (_currentVideo == null || !_downloadController.LibrariesAvailable())
 		{
 			ResetVideoMenu();
-			Log.Debug("No video configured");
+			Plugin.Log.Debug("No video configured");
 			return;
 		}
 
@@ -296,7 +296,7 @@ public class VideoMenu
 		if (!_videoMenuActive)
 		{
 			ResetVideoMenu();
-			Log.Debug("Video Menu is not active");
+			Plugin.Log.Debug("Video Menu is not active");
 			return;
 		}
 
@@ -509,7 +509,7 @@ public class VideoMenu
 			return;
 		}
 
-		Log.Debug($"Setting level to {level.levelID}");
+		Plugin.Log.Debug($"Setting level to {level.levelID}");
 		HandleDidSelectLevel(level);
 	}
 
@@ -576,7 +576,7 @@ public class VideoMenu
 	{
 		if (!_videoMenuInitialized)
 		{
-			Log.Debug("Initializing video menu (late)");
+			Plugin.Log.Debug("Initializing video menu (late)");
 			Init();
 		}
 
@@ -634,7 +634,7 @@ public class VideoMenu
 		catch (Exception exception)
 		{
 			//This can happen when closing the game
-			Log.Debug(exception);
+			Plugin.Log.Debug(exception);
 		}
 	}
 
@@ -657,7 +657,7 @@ public class VideoMenu
 	{
 		if (_currentLevel == null)
 		{
-			Log.Warn("Selected level was null on search action");
+			Plugin.Log.Warn("Selected level was null on search action");
 			return;
 		}
 
@@ -691,7 +691,7 @@ public class VideoMenu
 		}
 		catch (Exception e)
 		{
-			Log.Warn(e);
+			Plugin.Log.Warn(e);
 		}
 
 		var item = new CustomListTableData.CustomCellInfo(title, description);
@@ -704,7 +704,7 @@ public class VideoMenu
 		}
 		else
 		{
-			Log.Debug(request.error);
+			Plugin.Log.Debug(request.error);
 		}
 
 		_customListTableData.Data.Add(item);
@@ -759,7 +759,7 @@ public class VideoMenu
 	{
 		if (_currentVideo == null)
 		{
-			Log.Warn("Current video was null on delete action");
+			Plugin.Log.Warn("Current video was null on delete action");
 			return;
 		}
 
@@ -801,7 +801,7 @@ public class VideoMenu
 	{
 		if (_currentVideo == null || _currentLevel == null)
 		{
-			Log.Warn("Failed to delete config: Either currentVideo or currentLevel is null");
+			Plugin.Log.Warn("Failed to delete config: Either currentVideo or currentLevel is null");
 			return;
 		}
 
@@ -947,10 +947,10 @@ public class VideoMenu
 	[UsedImplicitly]
 	private void OnDownloadAction()
 	{
-		Log.Debug("Download pressed");
+		Plugin.Log.Debug("Download pressed");
 		if (_selectedCell < 0 || _currentLevel == null)
 		{
-			Log.Error("No cell or level selected on download action");
+			Plugin.Log.Error("No cell or level selected on download action");
 			return;
 		}
 

@@ -38,7 +38,7 @@ public class HarmonyPatchController
 			}
 			catch (Exception e)
 			{
-				Log.Error(e);
+				Plugin.Log.Error(e);
 			}
 		});
 	}

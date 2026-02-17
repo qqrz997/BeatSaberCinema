@@ -1,20 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- This file contains project properties used by the build. -->
 <Project>
-	<ItemGroup>
-		<SourceRoot Include="$(MSBuildThisFileDirectory)/"/>
-	</ItemGroup>
+
+	<!-- Plugin Metadata -->
 	<PropertyGroup>
-		<DisableZipRelease>false</DisableZipRelease>
+		<PluginId>BeatSaberCinema</PluginId>
+		<PluginName>Cinema</PluginName>
+		<Authors>Dakari</Authors>
+		<Version>1.7.13</Version>
+		<GameVersion>1.42.0</GameVersion>
+		<Description>lay videos in the background of your beatmaps</Description>
+		<!--<PluginIcon></PluginIcon>-->
+		<ProjectSource>https://github.com/Kevga/BeatSaberCinema</ProjectSource>
+		<!--<ProjectHome></ProjectHome>-->
+		<DonateUrl>https://ko-fi.com/dakari</DonateUrl>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
-		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-		<DisableCopyToPlugins>true</DisableCopyToPlugins>
+
+	<!-- Plugin Dependencies -->
+	<ItemGroup>
+		<DependsOn Include="BSIPA" Version="^4.3.0"/>
+		<DependsOn Include="SiraUtil" Version="^3.1.0"/>
+		<DependsOn Include="SongCore" Version="^3.14.0"/>
+		<DependsOn Include="BS Utils" Version="^1.14.0"/>
+	</ItemGroup>
+
+	<PropertyGroup>
+		<BSMTProjectType>BSIPA</BSMTProjectType>
+		<GenerateManifest>true</GenerateManifest>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' != 'Release'">
 		<DisableZipRelease>true</DisableZipRelease>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(NCrunch)' == '1'">
-		<ContinuousIntegrationBuild>false</ContinuousIntegrationBuild>
-		<DisableCopyToPlugins>true</DisableCopyToPlugins>
-		<DisableZipRelease>true</DisableZipRelease>
-	</PropertyGroup>
+
 </Project>

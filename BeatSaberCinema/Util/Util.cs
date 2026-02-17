@@ -81,7 +81,9 @@ namespace BeatSaberCinema
 
 		public static Texture? LoadPNGFromResources(string resourcePath)
 		{
+#pragma warning disable CS0618 // Type or member is obsolete
 			var fileData = BeatSaberMarkupLanguage.Utilities.GetResource(Assembly.GetExecutingAssembly(), resourcePath);
+#pragma warning restore CS0618 // Type or member is obsolete
 			if (fileData.Length <= 0)
 			{
 				return null;

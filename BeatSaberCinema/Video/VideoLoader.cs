@@ -526,7 +526,9 @@ namespace BeatSaberCinema
 
 		private static IEnumerable<BundledConfig> LoadBundledConfigs()
 		{
+#pragma warning disable CS0618 // Type or member is obsolete
 			var buffer = BeatSaberMarkupLanguage.Utilities.GetResource(Assembly.GetExecutingAssembly(), "BeatSaberCinema.Resources.configs.json");
+#pragma warning restore CS0618 // Type or member is obsolete
 			var jsonString = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
 			var configs = JsonConvert.DeserializeObject<BundledConfig[]>(jsonString);
 			if (configs == null)

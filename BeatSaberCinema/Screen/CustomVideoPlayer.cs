@@ -169,7 +169,9 @@ namespace BeatSaberCinema
 			AssetBundle myLoadedAssetBundle;
 			if (path == null)
 			{
+#pragma warning disable CS0618 // Type or member is obsolete
 				var bundle = BeatSaberMarkupLanguage.Utilities.GetResource(Assembly.GetExecutingAssembly(), "BeatSaberCinema.Resources.bscinema.bundle");
+#pragma warning restore CS0618 // Type or member is obsolete
 				if (bundle == null || bundle.Length == 0)
 				{
 					Log.Error("GetResource failed");

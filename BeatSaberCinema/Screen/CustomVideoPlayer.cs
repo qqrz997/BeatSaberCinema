@@ -3,13 +3,15 @@ using System.Collections;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using BS_Utils.Utilities;
+using IPA.Utilities.Async;
 using UnityEngine;
 using UnityEngine.Video;
 
 namespace BeatSaberCinema;
 
-public class CustomVideoPlayer: MonoBehaviour
+public class CustomVideoPlayer : MonoBehaviour
 {
 	//Initialized by Awake()
 	[NonSerialized] public VideoPlayer Player = null!;
@@ -78,7 +80,11 @@ public class CustomVideoPlayer: MonoBehaviour
 	{
 		CreateScreen();
 		_screenRenderer = screenController.GetRenderer();
-		_screenRenderer.material = new Material(GetShader()) {color = _screenColorOff};
+		UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
+		{
+			var shader = await GetShader();
+			_screenRenderer.material = new(shader) { color = _screenColorOff };
+		});
 		_screenRenderer.material.enableInstancing = true;
 
 		Player = gameObject.AddComponent<VideoPlayer>();
@@ -164,14 +170,12 @@ public class CustomVideoPlayer: MonoBehaviour
 		SetDefaultMenuPlacement();
 	}
 
-	private static Shader GetShader(string? path = null)
+	private static async Task<Shader> GetShader(string? path = null)
 	{
 		AssetBundle myLoadedAssetBundle;
 		if (path == null)
 		{
-#pragma warning disable CS0618 // Type or member is obsolete
-			var bundle = BeatSaberMarkupLanguage.Utilities.GetResource(Assembly.GetExecutingAssembly(), "BeatSaberCinema.Resources.bscinema.bundle");
-#pragma warning restore CS0618 // Type or member is obsolete
+			var bundle = await BeatSaberMarkupLanguage.Utilities.GetResourceAsync(Assembly.GetExecutingAssembly(), "BeatSaberCinema.Resources.bscinema.bundle");
 			if (bundle == null || bundle.Length == 0)
 			{
 				Log.Error("GetResource failed");

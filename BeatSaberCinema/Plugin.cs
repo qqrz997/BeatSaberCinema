@@ -4,6 +4,7 @@ using IPA;
 using IPA.Config.Stores;
 using IPA.Logging;
 using IPA.Utilities;
+using IPA.Utilities.Async;
 using JetBrains.Annotations;
 using SongCore;
 using Zenject;
@@ -44,7 +45,10 @@ namespace BeatSaberCinema
 		{
 			Log.Debug("Hardware info:\n"+Util.GetHardwareInfo(), true);
 			BSEvents.OnLoad();
-			VideoLoader.Init();
+			UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
+			{
+				await VideoLoader.Init();
+			});
 		}
 
 		private static void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO scenesTransition)

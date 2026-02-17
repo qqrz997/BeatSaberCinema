@@ -58,9 +58,9 @@ public static class VideoLoader
 	}
 
 
-	public static void Init()
+	public static async Task Init()
 	{
-		var configs = LoadBundledConfigs();
+		var configs = await LoadBundledConfigs();
 		foreach (var config in configs)
 		{
 			BundledConfigs.TryAdd(config.levelID, config.config);
@@ -524,11 +524,9 @@ public static class VideoLoader
 		return videoConfig;
 	}
 
-	private static IEnumerable<BundledConfig> LoadBundledConfigs()
+	private static async Task<IEnumerable<BundledConfig>> LoadBundledConfigs()
 	{
-#pragma warning disable CS0618 // Type or member is obsolete
-		var buffer = BeatSaberMarkupLanguage.Utilities.GetResource(Assembly.GetExecutingAssembly(), "BeatSaberCinema.Resources.configs.json");
-#pragma warning restore CS0618 // Type or member is obsolete
+		var buffer = await BeatSaberMarkupLanguage.Utilities.GetResourceAsync(Assembly.GetExecutingAssembly(), "BeatSaberCinema.Resources.configs.json");
 		var jsonString = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
 		var configs = JsonConvert.DeserializeObject<BundledConfig[]>(jsonString);
 		if (configs == null)

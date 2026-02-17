@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using BeatSaberCinema.Patches;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -79,11 +80,9 @@ public static class Util
 		return s;
 	}
 
-	public static Texture? LoadPNGFromResources(string resourcePath)
+	public static async Task<Texture?> LoadPNGFromResources(string resourcePath)
 	{
-#pragma warning disable CS0618 // Type or member is obsolete
-		var fileData = BeatSaberMarkupLanguage.Utilities.GetResource(Assembly.GetExecutingAssembly(), resourcePath);
-#pragma warning restore CS0618 // Type or member is obsolete
+		var fileData = await BeatSaberMarkupLanguage.Utilities.GetResourceAsync(Assembly.GetExecutingAssembly(), resourcePath);
 		if (fileData.Length <= 0)
 		{
 			return null;

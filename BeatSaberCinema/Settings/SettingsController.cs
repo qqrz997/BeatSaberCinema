@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
+using IPA.Utilities.Async;
 using JetBrains.Annotations;
 
 // ReSharper disable UnusedMember.Global -- The getter functions are used by BSML
@@ -133,7 +134,11 @@ public class SettingsController: BSMLResourceViewController
 
 	private void SetSettingsTexture()
 	{
-		PlaybackController.Instance.VideoPlayer.SetStaticTexture(Util.LoadPNGFromResources("BeatSaberCinema.Resources.beat-saber-logo-landscape.png"));
+		UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
+		{
+			var png = await Util.LoadPNGFromResources("BeatSaberCinema.Resources.beat-saber-logo-landscape.png");
+			PlaybackController.Instance.VideoPlayer.SetStaticTexture(png);
+		});
 	}
 
 	protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)

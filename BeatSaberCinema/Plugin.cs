@@ -34,6 +34,7 @@ internal class Plugin
 		private set => _enabled = value;
 	}
 
+	[Init]
 	public Plugin(Logger logger, Config config, Zenjector zenjector)
 	{
 		Log = logger;
@@ -48,12 +49,7 @@ internal class Plugin
 	[UsedImplicitly]
 	public void OnApplicationStart()
 	{
-		Plugin.Log.Debug("Hardware info:\n"+Util.GetHardwareInfo());
 		BSEvents.OnLoad();
-		UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
-		{
-			await VideoLoader.Init();
-		});
 	}
 
 	private static void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO scenesTransition)
@@ -83,14 +79,11 @@ internal class Plugin
 		Collections.RegisterCapability(CAPABILITY);
 		if (File.Exists(Path.Combine(UnityGame.InstallPath, "dxgi.dll")))
 		{
-			Plugin.Log.Warn("dxgi.dll is present, video may fail to play. To fix this, delete the file dxgi.dll from your main Beat Saber folder (not in Plugins).");
+			Log.Warn("dxgi.dll is present, video may fail to play. To fix this, delete the file dxgi.dll from your main Beat Saber folder (not in Plugins).");
 		}
 
 		//No need to index maps if the filter isn't going to be applied anyway
-		if (InstalledMods.BetterSongList)
-		{
-			Loader.SongsLoadedEvent += VideoLoader.IndexMaps;
-		}
+
 	}
 
 	[OnDisable]
@@ -99,7 +92,6 @@ internal class Plugin
 	{
 		Enabled = false;
 		BSEvents.lateMenuSceneLoadedFresh -= OnMenuSceneLoadedFresh;
-		Loader.SongsLoadedEvent -= VideoLoader.IndexMaps;
 		RemoveHarmonyPatches();
 		_harmonyPatchController = null;
 		SettingsUI.RemoveMenu();
@@ -109,7 +101,7 @@ internal class Plugin
 
 		VideoMenu.RemoveTab();
 		EnvironmentController.Disable();
-		VideoLoader.StopFileSystemWatcher();
+		StaticSingletons.VideoLoader.StopFileSystemWatcher();
 		Collections.DeregisterCapability(CAPABILITY);
 	}
 
@@ -134,11 +126,11 @@ internal class Plugin
 
 		if (_filterAdded)
 		{
-			Plugin.Log.Debug($"Registered {nameof(HasVideoFilter)}");
+			Log.Debug($"Registered {nameof(HasVideoFilter)}");
 		}
 		else
 		{
-			Plugin.Log.Error($"Failed to register {nameof(HasVideoFilter)}");
+			Log.Error($"Failed to register {nameof(HasVideoFilter)}");
 		}
 	}
 }

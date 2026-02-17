@@ -98,7 +98,7 @@ public class VideoConfig
 		}
 	}
 
-	[JsonIgnore] public string? ConfigPath => LevelDir != null ? VideoLoader.GetConfigPath(LevelDir) : null;
+	[JsonIgnore] public string? ConfigPath => LevelDir != null ? StaticSingletons.VideoLoader.GetConfigPath(LevelDir) : null;
 	[JsonIgnore] public bool IsPlayable => (DownloadState == DownloadState.Downloaded) && !PlaybackDisabledByMissingSuggestion;
 	[JsonIgnore] public bool IsWIPLevel =>
 		LevelDir != null &&

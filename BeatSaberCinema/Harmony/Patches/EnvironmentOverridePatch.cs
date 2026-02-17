@@ -86,7 +86,7 @@ internal static class StandardLevelScenesTransitionSetupDataSOInit
 			};
 
 			var environmentName = beatmapLevel.GetEnvironmentName(beatmapKey.beatmapCharacteristic, beatmapKey.difficulty);
-			var mapEnvironmentInfoSo = VideoLoader.CustomLevelLoader._environmentsListModel.GetEnvironmentInfoBySerializedNameSafe(environmentName);
+			var mapEnvironmentInfoSo = StaticSingletons.VideoLoader.CustomLevelLoader._environmentsListModel.GetEnvironmentInfoBySerializedNameSafe(environmentName);
 			if (overrideEnvironmentSettings is { overrideEnvironments: true })
 			{
 				var overrideEnvironmentInfo = overrideEnvironmentSettings.GetOverrideEnvironmentInfoForType(mapEnvironmentInfoSo.environmentType);

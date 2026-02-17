@@ -125,7 +125,7 @@ public class DownloadController: YoutubeDLController
 		if (video.DownloadState == DownloadState.Cancelled || video.DownloadState == DownloadState.NotDownloaded)
 		{
 			Plugin.Log.Info("Cancelled download");
-			VideoLoader.DeleteVideo(video);
+			StaticSingletons.VideoLoader.DeleteVideo(video);
 			DownloadFinished?.Invoke(video);
 		}
 		else
@@ -289,7 +289,7 @@ public class DownloadController: YoutubeDLController
 			DisposeProcess(process);
 		}
 
-		VideoLoader.DeleteVideo(video);
+		StaticSingletons.VideoLoader.DeleteVideo(video);
 	}
 
 	private bool UrlInWhitelist(string url)

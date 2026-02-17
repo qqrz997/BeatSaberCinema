@@ -78,7 +78,7 @@ public class PlaybackController: MonoBehaviour
 		BSEvents.songUnpaused += ResumeVideo;
 		BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoadedFresh;
 		BSEvents.menuSceneLoaded += OnMenuSceneLoaded;
-		VideoLoader.ConfigChanged += OnConfigChanged;
+		StaticSingletons.VideoLoader.ConfigChanged += OnConfigChanged;
 		VideoPlayer.Player.prepareCompleted += OnPrepareComplete;
 		Events.DifficultySelected += DifficultySelected;
 		DontDestroyOnLoad(gameObject);
@@ -96,7 +96,7 @@ public class PlaybackController: MonoBehaviour
 		BSEvents.songUnpaused -= ResumeVideo;
 		BSEvents.lateMenuSceneLoadedFresh -= OnMenuSceneLoadedFresh;
 		BSEvents.menuSceneLoaded -= OnMenuSceneLoaded;
-		VideoLoader.ConfigChanged -= OnConfigChanged;
+		StaticSingletons.VideoLoader.ConfigChanged -= OnConfigChanged;
 		VideoPlayer.Player.prepareCompleted -= OnPrepareComplete;
 		Events.DifficultySelected -= DifficultySelected;
 	}
@@ -352,7 +352,7 @@ public class PlaybackController: MonoBehaviour
 			try
 			{
 				Plugin.Log.Debug($"Preview start time: {startTime}, offset: {VideoConfig.GetOffsetInSec()}");
-				var audioClip = await VideoLoader.GetAudioClipForLevel(_currentLevel);
+				var audioClip = await StaticSingletons.VideoLoader.GetAudioClipForLevel(_currentLevel);
 				if (audioClip != null)
 				{
 					SongPreviewPlayerController.SongPreviewPlayer.CrossfadeTo(audioClip, -5f, startTime, _currentLevel.songDuration, null);
@@ -548,7 +548,7 @@ public class PlaybackController: MonoBehaviour
 
 		Plugin.Log.Debug("Preparing video...");
 		PrepareVideo(VideoConfig);
-		if (level != null && VideoLoader.IsDlcSong(level))
+		if (level != null && StaticSingletons.VideoLoader.IsDlcSong(level))
 		{
 			VideoPlayer.FadeOut();
 		}
@@ -661,7 +661,7 @@ public class PlaybackController: MonoBehaviour
 			var bsUtilsLevel = BS_Utils.Plugin.LevelData.GameplayCoreSceneSetupData.beatmapLevel;
 			if (_currentLevel?.levelID != bsUtilsLevel.levelID)
 			{
-				var video = VideoLoader.GetConfigForLevel(bsUtilsLevel);
+				var video = StaticSingletons.VideoLoader.GetConfigForLevel(bsUtilsLevel);
 				SetSelectedLevel(bsUtilsLevel, video);
 			}
 		}
@@ -682,7 +682,7 @@ public class PlaybackController: MonoBehaviour
 
 		if (VideoConfig.NeedsToSave)
 		{
-			VideoLoader.SaveVideoConfig(VideoConfig);
+			StaticSingletons.VideoLoader.SaveVideoConfig(VideoConfig);
 		}
 
 		VideoPlayer.SetPlacement(Placement.CreatePlacementForConfig(VideoConfig, _activeScene, VideoPlayer.GetVideoAspectRatio()));
@@ -1112,7 +1112,7 @@ public class PlaybackController: MonoBehaviour
 			return;
 		}
 
-		if (_currentLevel != null && VideoLoader.IsDlcSong(_currentLevel))
+		if (_currentLevel != null && StaticSingletons.VideoLoader.IsDlcSong(_currentLevel))
 		{
 			return;
 		}

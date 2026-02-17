@@ -127,7 +127,7 @@ public class VideoMenu
 		_searchController.SearchFinished += SearchFinished;
 		_downloadController.DownloadProgress += OnDownloadProgress;
 		_downloadController.DownloadFinished += OnDownloadFinished;
-		VideoLoader.ConfigChanged += OnConfigChanged;
+		StaticSingletons.VideoLoader.ConfigChanged += OnConfigChanged;
 
 		if (!_downloadController.LibrariesAvailable())
 		{
@@ -212,11 +212,11 @@ public class VideoMenu
 		_deleteButton.interactable = state;
 		_deleteVideoButton.interactable = state;
 		_searchButton.gameObject.SetActive(_currentLevel != null &&
-		                                   !VideoLoader.IsDlcSong(_currentLevel) &&
+		                                   !StaticSingletons.VideoLoader.IsDlcSong(_currentLevel) &&
 		                                   _downloadController.LibrariesAvailable());
 		_previewButtonText.text = PlaybackController.Instance.IsPreviewPlaying ? "Stop preview" : "Preview";
 
-		if (_currentLevel != null && VideoLoader.IsDlcSong(_currentLevel) && _downloadController.LibrariesAvailable())
+		if (_currentLevel != null && StaticSingletons.VideoLoader.IsDlcSong(_currentLevel) && _downloadController.LibrariesAvailable())
 		{
 			CheckEntitlementAndEnableSearch(_currentLevel);
 		}
@@ -265,7 +265,7 @@ public class VideoMenu
 
 	private async void CheckEntitlementAndEnableSearch(BeatmapLevel level)
 	{
-		var entitlement = await VideoLoader.GetEntitlementForLevel(level);
+		var entitlement = await StaticSingletons.VideoLoader.GetEntitlementForLevel(level);
 		if (entitlement == EntitlementStatus.Owned && _currentLevel == level)
 		{
 			_searchButton.gameObject.SetActive(true);
@@ -523,11 +523,11 @@ public class VideoMenu
 		PlaybackController.Instance.StopPreview(true);
 		if (_currentVideo?.NeedsToSave == true)
 		{
-			VideoLoader.SaveVideoConfig(_currentVideo);
+			StaticSingletons.VideoLoader.SaveVideoConfig(_currentVideo);
 		}
 
-		_currentVideo = VideoLoader.GetConfigForEditorLevel(beatmapData, originalPath);
-		VideoLoader.SetupFileSystemWatcher(originalPath);
+		_currentVideo = StaticSingletons.VideoLoader.GetConfigForEditorLevel(beatmapData, originalPath);
+		StaticSingletons.VideoLoader.SetupFileSystemWatcher(originalPath);
 		PlaybackController.Instance.SetSelectedLevel(null, _currentVideo);
 	}
 
@@ -552,7 +552,7 @@ public class VideoMenu
 
 		if (_currentVideo?.NeedsToSave == true)
 		{
-			VideoLoader.SaveVideoConfig(_currentVideo);
+			StaticSingletons.VideoLoader.SaveVideoConfig(_currentVideo);
 		}
 		_currentLevel = level;
 		if (_currentLevel == null)
@@ -563,9 +563,9 @@ public class VideoMenu
 			return;
 		}
 
-		_currentVideo = VideoLoader.GetConfigForLevel(_currentLevel);
+		_currentVideo = StaticSingletons.VideoLoader.GetConfigForLevel(_currentLevel);
 
-		VideoLoader.SetupFileSystemWatcher(_currentLevel);
+		StaticSingletons.VideoLoader.SetupFileSystemWatcher(_currentLevel);
 		PlaybackController.Instance.SetSelectedLevel(_currentLevel, _currentVideo);
 		SetupVideoDetails();
 
@@ -617,7 +617,7 @@ public class VideoMenu
 		_videoMenuActive = false;
 		if (_currentVideo?.NeedsToSave == true)
 		{
-			VideoLoader.SaveVideoConfig(_currentVideo);
+			StaticSingletons.VideoLoader.SaveVideoConfig(_currentVideo);
 		}
 
 		if (PlaybackController.Instance == null)
@@ -732,7 +732,7 @@ public class VideoMenu
 
 		if (_currentLevel != null)
 		{
-			VideoLoader.RemoveConfigFromCache(_currentLevel);
+			StaticSingletons.VideoLoader.RemoveConfigFromCache(_currentLevel);
 		}
 
 		SetupVideoDetails();
@@ -779,10 +779,10 @@ public class VideoMenu
 				_searchController.StopSearch();
 				_downloadController.StartDownload(_currentVideo, SettingsStore.Instance.QualityMode);
 				_currentVideo.NeedsToSave = true;
-				VideoLoader.AddConfigToCache(_currentVideo, _currentLevel!);
+				StaticSingletons.VideoLoader.AddConfigToCache(_currentVideo, _currentLevel!);
 				break;
 			default:
-				VideoLoader.DeleteVideo(_currentVideo);
+				StaticSingletons.VideoLoader.DeleteVideo(_currentVideo);
 				PlaybackController.Instance.VideoPlayer.Stop();
 				PlaybackController.Instance.VideoPlayer.Player.url = null;
 				PlaybackController.Instance.VideoPlayer.Player.Prepare();
@@ -814,8 +814,8 @@ public class VideoMenu
 			_downloadController.CancelDownload(_currentVideo);
 		}
 
-		VideoLoader.DeleteVideo(_currentVideo);
-		var success = VideoLoader.DeleteConfig(_currentVideo, _currentLevel);
+		StaticSingletons.VideoLoader.DeleteVideo(_currentVideo);
+		var success = StaticSingletons.VideoLoader.DeleteConfig(_currentVideo, _currentLevel);
 		if (success)
 		{
 			_currentVideo = null;
@@ -955,8 +955,8 @@ public class VideoMenu
 		}
 
 		_downloadButton.interactable = false;
-		var config = new VideoConfig(_searchController.SearchResults[_selectedCell], VideoLoader.GetLevelPath(_currentLevel)) { NeedsToSave = true };
-		VideoLoader.AddConfigToCache(config, _currentLevel);
+		var config = new VideoConfig(_searchController.SearchResults[_selectedCell], StaticSingletons.VideoLoader.GetLevelPath(_currentLevel)) { NeedsToSave = true };
+		StaticSingletons.VideoLoader.AddConfigToCache(config, _currentLevel);
 		_searchController.StopSearch();
 		_downloadController.StartDownload(config, SettingsStore.Instance.QualityMode);
 		_currentVideo = config;

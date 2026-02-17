@@ -12,40 +12,43 @@ using System.Threading.Tasks;
 using BeatmapEditor3D.DataModels;
 using IPA.Utilities.Async;
 using Newtonsoft.Json;
+using SiraUtil.Zenject;
 using SongCore;
 using UnityEngine;
+using Zenject;
 
 namespace BeatSaberCinema;
 
-public static class VideoLoader
+internal class VideoLoader : IInitializable, IAsyncInitializable, IDisposable
 {
+	public const string WIP_DIRECTORY_NAME = "CinemaWIPVideos";
+	public const string WIP_MAPS_FOLDER = "CustomWIPLevels";
+
 	private const string OST_DIRECTORY_NAME = "CinemaOSTVideos";
-	internal const string WIP_DIRECTORY_NAME = "CinemaWIPVideos";
-	internal const string WIP_MAPS_FOLDER = "CustomWIPLevels";
 	private const string CONFIG_FILENAME = "cinema-video.json";
 	private const string CONFIG_FILENAME_MVP = "video.json";
 
-	private static FileSystemWatcher? _fileSystemWatcher;
-	public static event Action<VideoConfig?>? ConfigChanged;
-	private static string? _ignoreNextEventForPath;
+	private  FileSystemWatcher? _fileSystemWatcher;
+	public  event Action<VideoConfig?>? ConfigChanged;
+	private  string? _ignoreNextEventForPath;
 
 	//This should ideally be a HashSet, but there is no concurrent version of it. We also don't need the value, so use the smallest possible type.
-	internal static readonly ConcurrentDictionary<string, byte> MapsWithVideo = new ConcurrentDictionary<string, byte>();
-	private static readonly ConcurrentDictionary<string, VideoConfig> CachedConfigs = new ConcurrentDictionary<string, VideoConfig>();
-	private static readonly ConcurrentDictionary<string, VideoConfig> BundledConfigs = new ConcurrentDictionary<string, VideoConfig>();
+	public readonly ConcurrentDictionary<string, byte> MapsWithVideo = new();
+	private readonly ConcurrentDictionary<string, VideoConfig> CachedConfigs = new();
+	private readonly ConcurrentDictionary<string, VideoConfig> BundledConfigs = new();
 
-	private static BeatmapLevelsModel? _beatmapLevelsModel;
-	private static BeatmapLevelsEntitlementModel? _beatmapLevelsEntitlementModel;
-	private static AudioClipAsyncLoader? _audioClipAsyncLoader;
-	private static CustomLevelLoader? _customLevelLoader;
+	private  BeatmapLevelsModel? _beatmapLevelsModel;
+	private  BeatmapLevelsEntitlementModel? _beatmapLevelsEntitlementModel;
+	private  AudioClipAsyncLoader? _audioClipAsyncLoader;
+	private  CustomLevelLoader? _customLevelLoader;
 
-	public static BeatmapLevelsModel BeatmapLevelsModel =>
+	private  BeatmapLevelsModel BeatmapLevelsModel =>
 		_beatmapLevelsModel ??= Plugin.menuContainer.Resolve<BeatmapLevelsModel>();
-	private static BeatmapLevelsEntitlementModel BeatmapLevelsEntitlementModel =>
+	private  BeatmapLevelsEntitlementModel BeatmapLevelsEntitlementModel =>
 		_beatmapLevelsEntitlementModel ??= BeatmapLevelsModel._entitlements;
-	private static AudioClipAsyncLoader AudioClipAsyncLoader =>
+	private  AudioClipAsyncLoader AudioClipAsyncLoader =>
 		_audioClipAsyncLoader ??= Plugin.menuContainer.Resolve<AudioClipAsyncLoader>();
-	public static CustomLevelLoader CustomLevelLoader
+	public  CustomLevelLoader CustomLevelLoader
 	{
 		get
 		{
@@ -57,17 +60,28 @@ public static class VideoLoader
 		}
 	}
 
-
-	public static async Task Init()
+	public async Task InitializeAsync(CancellationToken token)
 	{
-		var configs = await LoadBundledConfigs();
-		foreach (var config in configs)
+		foreach (var config in await LoadBundledConfigs())
 		{
 			BundledConfigs.TryAdd(config.levelID, config.config);
 		}
 	}
 
-	internal static async void IndexMaps(Loader? loader = null, ConcurrentDictionary<string, BeatmapLevel>? beatmapLevels = null)
+	public void Initialize()
+	{
+		if (InstalledMods.BetterSongList)
+		{
+			Loader.SongsLoadedEvent += IndexMaps;
+		}
+	}
+
+	public void Dispose()
+	{
+		Loader.SongsLoadedEvent -= IndexMaps;
+	}
+
+	public async void IndexMaps(Loader loader, ConcurrentDictionary<string, BeatmapLevel> beatmapLevels)
 	{
 		Plugin.Log.Debug("Indexing maps...");
 		var stopwatch = new Stopwatch();
@@ -93,27 +107,27 @@ public static class VideoLoader
 		Plugin.Log.Debug($"Indexing took {stopwatch.ElapsedMilliseconds} ms");
 	}
 
-	private static List<BeatmapLevel> GetOfficialMaps()
+	private  List<BeatmapLevel> GetOfficialMaps()
 	{
 		var officialMaps = new List<BeatmapLevel>();
-
-		void AddOfficialPackCollection(BeatmapLevelsRepository beatmapLevelsRepository)
-		{
-			officialMaps.AddRange(beatmapLevelsRepository.beatmapLevelPacks.SelectMany(pack => pack._beatmapLevels));
-		}
 
 		AddOfficialPackCollection(BeatmapLevelsModel.ostAndExtrasBeatmapLevelsRepository);
 		AddOfficialPackCollection(BeatmapLevelsModel.dlcBeatmapLevelsRepository);
 
 		return officialMaps;
+
+		void AddOfficialPackCollection(BeatmapLevelsRepository beatmapLevelsRepository)
+		{
+			officialMaps.AddRange(beatmapLevelsRepository.beatmapLevelPacks.SelectMany(pack => pack._beatmapLevels));
+		}
 	}
 
-	private static void IndexMap(KeyValuePair<string, BeatmapLevel> levelKeyValuePair)
+	private  void IndexMap(KeyValuePair<string, BeatmapLevel> levelKeyValuePair)
 	{
 		IndexMap(levelKeyValuePair.Value);
 	}
 
-	private static void IndexMap(BeatmapLevel level)
+	private  void IndexMap(BeatmapLevel level)
 	{
 		var configPath = GetConfigPath(level);
 		if (File.Exists(configPath))
@@ -122,18 +136,18 @@ public static class VideoLoader
 		}
 	}
 
-	public static string GetConfigPath(BeatmapLevel level)
+	private  string GetConfigPath(BeatmapLevel level)
 	{
 		var levelPath = GetLevelPath(level);
 		return Path.Combine(levelPath, CONFIG_FILENAME);
 	}
 
-	public static string GetConfigPath(string levelPath)
+	public  string GetConfigPath(string levelPath)
 	{
 		return Path.Combine(levelPath, CONFIG_FILENAME);
 	}
 
-	public static void AddConfigToCache(VideoConfig config, BeatmapLevel level)
+	public  void AddConfigToCache(VideoConfig config, BeatmapLevel level)
 	{
 		var success = CachedConfigs.TryAdd(level.levelID, config);
 		MapsWithVideo.TryAdd(level.levelID, 0);
@@ -143,7 +157,7 @@ public static class VideoLoader
 		}
 	}
 
-	public static void RemoveConfigFromCache(BeatmapLevel level)
+	public  void RemoveConfigFromCache(BeatmapLevel level)
 	{
 		var success = CachedConfigs.TryRemove(level.levelID, out _);
 		if (success)
@@ -152,7 +166,7 @@ public static class VideoLoader
 		}
 	}
 
-	private static VideoConfig? GetConfigFromCache(BeatmapLevel level)
+	private  VideoConfig? GetConfigFromCache(BeatmapLevel level)
 	{
 		var success = CachedConfigs.TryGetValue(level.levelID, out var config);
 		if (success)
@@ -162,7 +176,7 @@ public static class VideoLoader
 		return config;
 	}
 
-	private static VideoConfig? GetConfigFromBundledConfigs(BeatmapLevel level)
+	private  VideoConfig? GetConfigFromBundledConfigs(BeatmapLevel level)
 	{
 		var levelID = !level.hasPrecalculatedData ? level.levelID : Util.ReplaceIllegalFilesystemChars(level.songName.Trim());
 		BundledConfigs.TryGetValue(levelID, out var config);
@@ -179,24 +193,24 @@ public static class VideoLoader
 		return config;
 	}
 
-	public static void StopFileSystemWatcher()
+	public  void StopFileSystemWatcher()
 	{
 		Plugin.Log.Debug("Disposing FileSystemWatcher");
 		_fileSystemWatcher?.Dispose();
 	}
 
-	public static void SetupFileSystemWatcher(BeatmapLevel level)
+	public  void SetupFileSystemWatcher(BeatmapLevel level)
 	{
 		var levelPath = GetLevelPath(level);
 		ListenForConfigChanges(levelPath);
 	}
 
-	public static void SetupFileSystemWatcher(string path)
+	public  void SetupFileSystemWatcher(string path)
 	{
 		ListenForConfigChanges(path);
 	}
 
-	private static void ListenForConfigChanges(string levelPath)
+	private  void ListenForConfigChanges(string levelPath)
 	{
 		_fileSystemWatcher?.Dispose();
 		if (!Directory.Exists(levelPath))
@@ -214,7 +228,7 @@ public static class VideoLoader
 
 		Plugin.Log.Debug($"Setting up FileSystemWatcher for {levelPath}");
 
-		_fileSystemWatcher = new FileSystemWatcher();
+		_fileSystemWatcher = new();
 		var configPath = GetConfigPath(levelPath);
 		_fileSystemWatcher.Path = Path.GetDirectoryName(configPath);
 		_fileSystemWatcher.Filter = Path.GetFileName(configPath);
@@ -226,12 +240,12 @@ public static class VideoLoader
 		_fileSystemWatcher.Renamed += OnConfigChanged;
 	}
 
-	private static void OnConfigChanged(object _, FileSystemEventArgs e)
+	private  void OnConfigChanged(object _, FileSystemEventArgs e)
 	{
 		UnityMainThreadTaskScheduler.Factory.StartNew(delegate { OnConfigChangedMainThread(e); });
 	}
 
-	private static void OnConfigChangedMainThread(FileSystemEventArgs e)
+	private  void OnConfigChangedMainThread(FileSystemEventArgs e)
 	{
 		Plugin.Log.Debug("Config "+e.ChangeType+" detected: "+e.FullPath);
 		if (_ignoreNextEventForPath == e.FullPath && !Util.IsInEditor())
@@ -243,7 +257,7 @@ public static class VideoLoader
 		CoroutineStarter.Instance.StartCoroutine(WaitForConfigWriteCoroutine(e));
 	}
 
-	private static IEnumerator WaitForConfigWriteCoroutine(FileSystemEventArgs e)
+	private  IEnumerator WaitForConfigWriteCoroutine(FileSystemEventArgs e)
 	{
 		if (e.ChangeType == WatcherChangeTypes.Deleted)
 		{
@@ -260,12 +274,12 @@ public static class VideoLoader
 		ConfigChanged?.Invoke(config);
 	}
 
-	public static bool IsDlcSong(BeatmapLevel level)
+	public  bool IsDlcSong(BeatmapLevel level)
 	{
 		return level.GetType() == typeof(BeatmapLevelSO);
 	}
 
-	public static async Task<AudioClip?> GetAudioClipForLevel(BeatmapLevel level)
+	public  async Task<AudioClip?> GetAudioClipForLevel(BeatmapLevel level)
 	{
 		if (!IsDlcSong(level))
 		{
@@ -282,7 +296,7 @@ public static class VideoLoader
 		return await LoadAudioClipAsync(level);
 	}
 
-	private static async Task<AudioClip?> LoadAudioClipAsync(BeatmapLevel level)
+	private  async Task<AudioClip?> LoadAudioClipAsync(BeatmapLevel level)
 	{
 		var loaderTask = AudioClipAsyncLoader.LoadPreview(level);
 		if (loaderTask == null)
@@ -294,12 +308,12 @@ public static class VideoLoader
 		return await loaderTask;
 	}
 
-	public static async Task<EntitlementStatus> GetEntitlementForLevel(BeatmapLevel level)
+	public  async Task<EntitlementStatus> GetEntitlementForLevel(BeatmapLevel level)
 	{
 		return await BeatmapLevelsEntitlementModel.GetLevelEntitlementStatusAsync(level.levelID, CancellationToken.None);
 	}
 
-	public static VideoConfig? GetConfigForEditorLevel(BeatmapDataModel _, string originalPath)
+	public  VideoConfig? GetConfigForEditorLevel(BeatmapDataModel _, string originalPath)
 	{
 		if (!Directory.Exists(originalPath))
 		{
@@ -313,7 +327,7 @@ public static class VideoLoader
 		return videoConfig;
 	}
 
-	public static VideoConfig? GetConfigForLevel(BeatmapLevel? level)
+	public  VideoConfig? GetConfigForLevel(BeatmapLevel? level)
 	{
 		if (InstalledMods.BeatSaberPlaylistsLib)
 		{
@@ -358,7 +372,7 @@ public static class VideoLoader
 
 		return videoConfig ?? GetConfigFromBundledConfigs(level);
 	}
-	public static string GetLevelPath(BeatmapLevel level)
+	public  string GetLevelPath(BeatmapLevel level)
 	{
 		if (!level.hasPrecalculatedData
 		    && CustomLevelLoader._loadedBeatmapSaveData.TryGetValue(level.levelID, out var levelData))
@@ -371,7 +385,7 @@ public static class VideoLoader
 		return Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomLevels", OST_DIRECTORY_NAME, songName);
 	}
 
-	public static void SaveVideoConfig(VideoConfig videoConfig)
+	public  void SaveVideoConfig(VideoConfig videoConfig)
 	{
 		if (videoConfig.LevelDir == null || videoConfig.ConfigPath == null || !Directory.Exists(videoConfig.LevelDir))
 		{
@@ -388,7 +402,7 @@ public static class VideoLoader
 		SaveVideoConfigToPath(videoConfig, configPath);
 	}
 
-	public static void SaveVideoConfigToPath(VideoConfig config, string configPath)
+	private  void SaveVideoConfigToPath(VideoConfig config, string configPath)
 	{
 		_ignoreNextEventForPath = configPath;
 		Plugin.Log.Info($"Saving video config to {configPath}");
@@ -414,7 +428,7 @@ public static class VideoLoader
 		}
 	}
 
-	public static void DeleteVideo(VideoConfig videoConfig)
+	public  void DeleteVideo(VideoConfig videoConfig)
 	{
 		if (videoConfig.VideoPath == null)
 		{
@@ -440,7 +454,7 @@ public static class VideoLoader
 		}
 	}
 
-	public static bool DeleteConfig(VideoConfig videoConfig, BeatmapLevel level)
+	public  bool DeleteConfig(VideoConfig videoConfig, BeatmapLevel level)
 	{
 		if (videoConfig.LevelDir == null)
 		{
@@ -476,7 +490,7 @@ public static class VideoLoader
 		return true;
 	}
 
-	private static VideoConfig? LoadConfig(string configPath)
+	private  VideoConfig? LoadConfig(string configPath)
 	{
 		if (!File.Exists(configPath))
 		{
@@ -496,7 +510,7 @@ public static class VideoLoader
 					Plugin.Log.Warn($"Deserializing video config at {configPath} failed");
 					return null;
 				}
-				videoConfig = new VideoConfig(videoConfigListBackCompat);
+				videoConfig = new(videoConfigListBackCompat);
 			}
 			else
 			{
@@ -524,7 +538,7 @@ public static class VideoLoader
 		return videoConfig;
 	}
 
-	private static async Task<IEnumerable<BundledConfig>> LoadBundledConfigs()
+	private  async Task<IEnumerable<BundledConfig>> LoadBundledConfigs()
 	{
 		var buffer = await BeatSaberMarkupLanguage.Utilities.GetResourceAsync(Assembly.GetExecutingAssembly(), "BeatSaberCinema.Resources.configs.json");
 		var jsonString = Encoding.UTF8.GetString(buffer, 0, buffer.Length);

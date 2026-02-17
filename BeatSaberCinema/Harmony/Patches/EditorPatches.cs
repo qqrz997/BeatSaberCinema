@@ -76,7 +76,7 @@ public class SavingFixPatch
 			return;
 		}
 
-		VideoLoader.StopFileSystemWatcher();
+		StaticSingletons.VideoLoader.StopFileSystemWatcher();
 		var config = PlaybackController.Instance.VideoConfig;
 		Plugin.Log.Info("Editor is creating backup, path: "+config.ConfigPath);
 		if (File.Exists(config.ConfigPath))
@@ -85,7 +85,7 @@ public class SavingFixPatch
 		}
 
 		Plugin.Log.Info("Restoring config...");
-		VideoLoader.SaveVideoConfig(config);
+		StaticSingletons.VideoLoader.SaveVideoConfig(config);
 	}
 }
 

@@ -13,6 +13,13 @@ internal class AppInstaller : Installer
 
 	public override void InstallBindings()
 	{
+		Plugin.Log.Debug("Hardware info:\n"+Util.GetHardwareInfo());
+
 		Container.BindInstance(config).AsSingle();
+
+		// todo: temporary
+		Container.Bind<StaticSingletons>().AsSingle().NonLazy();
+
+		Container.BindInterfacesAndSelfTo<VideoLoader>().AsSingle();
 	}
 }

@@ -13,7 +13,7 @@ public class HasVideoFilter : IFilter, ITransformerPlugin
 
 	public bool GetValueFor(BeatmapLevel level)
 	{
-		return VideoLoader.MapsWithVideo.TryGetValue(level.levelID, out _);
+		return StaticSingletons.VideoLoader.MapsWithVideo.TryGetValue(level.levelID, out _);
 	}
 
 	public Task Prepare(CancellationToken cancelToken)

@@ -1,3 +1,4 @@
+using BeatSaberCinema.Patches;
 using Zenject;
 
 namespace BeatSaberCinema.Installers;

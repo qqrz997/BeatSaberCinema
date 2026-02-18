@@ -57,7 +57,6 @@ internal class Plugin
 	{
 		PlaybackController.Create();
 
-		SongPreviewPlayerController.Init();
 		AddBetterSongListFilter();
 	}
 

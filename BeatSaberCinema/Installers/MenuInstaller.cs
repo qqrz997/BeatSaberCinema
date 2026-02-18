@@ -1,4 +1,5 @@
 using BeatSaberCinema.Menu;
+using BeatSaberCinema.Patches;
 using Zenject;
 
 namespace BeatSaberCinema.Installers;
@@ -13,5 +14,10 @@ internal class MenuInstaller : Installer
 
 		Container.BindInterfacesTo<GameplaySetupTabManager>().AsSingle();
 		Container.BindInterfacesTo<SettingsMenuManager>().AsSingle();
+
+		Container.BindInterfacesAndSelfTo<SongPreviewPlayerController>().AsSingle();
+
+		// Affinity patches
+		Container.BindInterfacesTo<SongPreviewPatch>().AsSingle();
 	}
 }

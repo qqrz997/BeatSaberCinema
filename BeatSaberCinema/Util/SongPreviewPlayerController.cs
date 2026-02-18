@@ -3,27 +3,34 @@ using UnityEngine;
 
 namespace BeatSaberCinema;
 
-public static class SongPreviewPlayerController
+public class SongPreviewPlayerController
 {
 	public static SongPreviewPlayer? SongPreviewPlayer;
 	private static AudioSource? _activeAudioSource;
-	public static SongPreviewPlayer.AudioSourceVolumeController[]? AudioSourceControllers;
+	public static SongPreviewPlayer.AudioSourceVolumeController[]? AudioSourceControllers { get; private set; }
 	private static int _channelCount;
 	private static int _activeChannel;
 	private static AudioClip? _currentAudioClip;
-	public static void Init()
+
+	public SongPreviewPlayerController(SongPreviewPlayer songPreviewPlayer)
 	{
-		AudioSourceControllers = null;
-		SongPreviewPlayer = Resources.FindObjectsOfTypeAll<SongPreviewPlayer>().LastOrDefault();
+		SongPreviewPlayer = songPreviewPlayer;
 	}
 
-	public static void SetFields(SongPreviewPlayer.AudioSourceVolumeController[] audioSourceControllers, int channelCount, int activeChannel,
-		AudioClip? audioClip, float startTime, float timeToDefault, bool isDefault)
+	public void SetFields(
+		SongPreviewPlayer.AudioSourceVolumeController[] audioSourceControllers,
+		int channelCount,
+		int activeChannel,
+		AudioClip audioClip,
+		float startTime,
+		float timeToDefault,
+		bool isDefault)
 	{
 		AudioSourceControllers = audioSourceControllers;
 		_channelCount = channelCount;
 		_activeChannel = activeChannel;
 		_currentAudioClip = audioClip;
+
 		UpdatePlaybackController(startTime, timeToDefault, isDefault);
 	}
 
@@ -37,7 +44,7 @@ public static class SongPreviewPlayerController
 
 		if (AudioSourceControllers == null)
 		{
-			Plugin.Log.Warn("Audiosources null in when updating playback controller");
+			Plugin.Log.Warn("AudioSources null when updating playback controller");
 			return;
 		}
 

@@ -11,7 +11,7 @@ using UnityEngine.Video;
 
 namespace BeatSaberCinema;
 
-public class PlaybackController: MonoBehaviour
+internal class PlaybackController: MonoBehaviour
 {
 	public enum Scene { SoloGameplay, MultiplayerGameplay, Menu, Other }
 	private Scene _activeScene = Scene.Other;

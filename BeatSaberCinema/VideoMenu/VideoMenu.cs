@@ -15,12 +15,13 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using Zenject;
 using Object = UnityEngine.Object;
 
 // ReSharper disable ArrangeMethodOrOperatorBody
 namespace BeatSaberCinema;
 
-public class VideoMenu
+public class VideoMenu : IInitializable
 {
 	[UIObject("root-object")] private readonly GameObject _root = null!;
 	[UIComponent("no-video-bg")] private readonly RectTransform _noVideoViewRect = null!;
@@ -89,7 +90,7 @@ public class VideoMenu
 
 	public static VideoMenu? Instance { get; private set; }
 
-	public void Init()
+	public void Initialize()
 	{
 		Events.LevelSelected -= OnLevelSelected;
 		Events.LevelSelected += OnLevelSelected;
@@ -149,26 +150,6 @@ public class VideoMenu
 		Plugin.Log.Debug("Adding status listener to: " + _menuStatus.name);
 		_menuStatus.DidEnable += StatusViewerDidEnable;
 		_menuStatus.DidDisable += StatusViewerDidDisable;
-	}
-
-	public static void AddTab()
-	{
-		if (Instance == null)
-		{
-			Plugin.Log.Debug("Initializing VideoMenu");
-			Instance = new VideoMenu();
-			Instance.Init();
-		}
-
-		Plugin.Log.Debug("Adding tab");
-		GameplaySetup.Instance.AddTab("Cinema", "BeatSaberCinema.VideoMenu.Views.video-menu.bsml", Instance, MenuType.All);
-	}
-
-	public static void RemoveTab()
-	{
-		Plugin.Log.Debug("Removing tab");
-		GameplaySetup.Instance.RemoveTab("Cinema");
-		Instance = null;
 	}
 
 	public void ResetVideoMenu()
@@ -577,7 +558,7 @@ public class VideoMenu
 		if (!_videoMenuInitialized)
 		{
 			Plugin.Log.Debug("Initializing video menu (late)");
-			Init();
+			Initialize();
 		}
 
 		if (levelSelectedArgs.BeatmapData != null)

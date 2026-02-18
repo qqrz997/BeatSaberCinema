@@ -11,7 +11,7 @@ using UnityEngine.Video;
 
 namespace BeatSaberCinema;
 
-public class CustomVideoPlayer : MonoBehaviour
+internal class CustomVideoPlayer : MonoBehaviour
 {
 	//Initialized by Awake()
 	[NonSerialized] public VideoPlayer Player = null!;

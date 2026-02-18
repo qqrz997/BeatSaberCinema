@@ -2,7 +2,7 @@
 
 namespace BeatSaberCinema;
 
-public class Placement
+internal class Placement
 {
 	public Vector3 Position;
 	public Vector3 Rotation;

@@ -1,42 +1,39 @@
 using System;
 using BeatSaberMarkupLanguage;
 using HMUI;
+using Zenject;
 
 namespace BeatSaberCinema;
 
-public class SettingsFlowCoordinator: FlowCoordinator
+public class SettingsFlowCoordinator : FlowCoordinator
 {
-	private SettingsController? _controller;
+	[Inject] private readonly SettingsController settingsViewController = null!;
 
-	public void Awake()
-	{
-		if (!_controller)
-		{
-			_controller = BeatSaberUI.CreateViewController<SettingsController>();
-		}
-	}
+	public event Action? DidFinish;
 
 	protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
 	{
 		try
 		{
-			if (!firstActivation)
+			if (firstActivation)
 			{
-				return;
+				showBackButton = true;
 			}
 
-			SetTitle("Cinema Settings");
-			showBackButton = true;
-			ProvideInitialViewControllers(_controller);
+			if (addedToHierarchy)
+			{
+				ProvideInitialViewControllers(settingsViewController);
+				SetTitle("Cinema Settings");
+			}
 		}
 		catch (Exception ex)
 		{
-			BeatSaberCinema.Plugin.Log.Error(ex);
+			Plugin.Log.Error(ex);
 		}
 	}
 
 	protected override void BackButtonWasPressed(ViewController viewController)
 	{
-		BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this);
+		DidFinish?.Invoke();
 	}
 }

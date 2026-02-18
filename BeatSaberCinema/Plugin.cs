@@ -56,13 +56,6 @@ internal class Plugin
 	{
 		PlaybackController.Create();
 
-		if (VideoMenu.Instance != null)
-		{
-			VideoMenu.RemoveTab();
-		}
-		VideoMenu.AddTab();
-
-		SettingsUI.CreateMenu();
 		SongPreviewPlayerController.Init();
 		AddBetterSongListFilter();
 	}
@@ -94,12 +87,10 @@ internal class Plugin
 		BSEvents.lateMenuSceneLoadedFresh -= OnMenuSceneLoadedFresh;
 		RemoveHarmonyPatches();
 		_harmonyPatchController = null;
-		SettingsUI.RemoveMenu();
 
 		//TODO Destroying and re-creating the PlaybackController messes up the VideoMenu without any exceptions in the Plugin.Log. Investigate.
 		//PlaybackController.Destroy();
 
-		VideoMenu.RemoveTab();
 		EnvironmentController.Disable();
 		StaticSingletons.VideoLoader.StopFileSystemWatcher();
 		Collections.DeregisterCapability(CAPABILITY);

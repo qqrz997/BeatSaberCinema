@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BeatSaberCinema;
 
-public class ScreenController
+internal class ScreenController
 {
 	internal readonly List<GameObject> Screens = new List<GameObject>();
 

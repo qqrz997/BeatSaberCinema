@@ -1,36 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+using System.Linq;
 using HarmonyLib;
+using Zenject;
 
 namespace BeatSaberCinema;
 
-public class HarmonyPatchController
+public class HarmonyPatchController : IInitializable, IDisposable
 {
-	private List<PatchClassProcessor>? _patchClassProcessorList;
-	private Harmony _harmonyInstance = null!;
-	private const string HARMONY_ID = "com.github.kevga.cinema";
+	private readonly Harmony _harmonyInstance = new("com.github.kevga.cinema");
 
-	private void InitPatches()
+	public void Initialize()
 	{
-		_harmonyInstance = new Harmony(HARMONY_ID);
+		var patchClassProcessors = AccessTools.GetTypesFromAssembly(Plugin.Assembly)
+			.Where(type => type.FullName is { } name && name.StartsWith("BeatSaberCinema.Patches"))
+			.Select(type => _harmonyInstance.CreateClassProcessor(type));
 
-		_patchClassProcessorList = new List<PatchClassProcessor>();
-		(AccessTools.GetTypesFromAssembly(Assembly.GetExecutingAssembly())).Do<Type>(type =>
-			{
-				if (type.FullName?.StartsWith("BeatSaberCinema.Patches") ?? false)
-				{
-					_patchClassProcessorList.Add(_harmonyInstance.CreateClassProcessor(type));
-				}
-			}
-		);
-	}
-
-	internal void PatchAll()
-	{
-		InitPatches();
-
-		_patchClassProcessorList?.ForEach(patchClassProcessor =>
+		foreach (var patchClassProcessor in patchClassProcessors)
 		{
 			try
 			{
@@ -40,10 +25,10 @@ public class HarmonyPatchController
 			{
 				Plugin.Log.Error(e);
 			}
-		});
+		}
 	}
 
-	internal void UnpatchAll()
+	public void Dispose()
 	{
 		_harmonyInstance.UnpatchSelf();
 	}

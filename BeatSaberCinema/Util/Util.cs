@@ -82,7 +82,7 @@ public static class Util
 
 	public static async Task<Texture?> LoadPNGFromResources(string resourcePath)
 	{
-		var fileData = await BeatSaberMarkupLanguage.Utilities.GetResourceAsync(Assembly.GetExecutingAssembly(), resourcePath);
+		var fileData = await BeatSaberMarkupLanguage.Utilities.GetResourceAsync(Plugin.Assembly, resourcePath);
 		if (fileData.Length <= 0)
 		{
 			return null;

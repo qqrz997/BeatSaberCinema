@@ -1,4 +1,5 @@
 using System.IO;
+using System.Reflection;
 using BeatSaberCinema.Installers;
 using BS_Utils.Utilities;
 using IPA;
@@ -18,10 +19,10 @@ namespace BeatSaberCinema;
 [UsedImplicitly]
 internal class Plugin
 {
+	public static Assembly Assembly { get; } = Assembly.GetExecutingAssembly();
 	public static Logger Log { get; private set; } = null!; // Set in [Init]
 
 	internal const string CAPABILITY = "Cinema";
-	private HarmonyPatchController? _harmonyPatchController;
 	private static bool _enabled;
 	private static bool _filterAdded;
 
@@ -66,8 +67,6 @@ internal class Plugin
 	{
 		Enabled = true;
 		BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoadedFresh;
-		_harmonyPatchController = new HarmonyPatchController();
-		ApplyHarmonyPatches();
 		EnvironmentController.Init();
 		Collections.RegisterCapability(CAPABILITY);
 		if (File.Exists(Path.Combine(UnityGame.InstallPath, "dxgi.dll")))
@@ -85,8 +84,6 @@ internal class Plugin
 	{
 		Enabled = false;
 		BSEvents.lateMenuSceneLoadedFresh -= OnMenuSceneLoadedFresh;
-		RemoveHarmonyPatches();
-		_harmonyPatchController = null;
 
 		//TODO Destroying and re-creating the PlaybackController messes up the VideoMenu without any exceptions in the Plugin.Log. Investigate.
 		//PlaybackController.Destroy();
@@ -94,16 +91,6 @@ internal class Plugin
 		EnvironmentController.Disable();
 		StaticSingletons.VideoLoader.StopFileSystemWatcher();
 		Collections.DeregisterCapability(CAPABILITY);
-	}
-
-	private void ApplyHarmonyPatches()
-	{
-		_harmonyPatchController?.PatchAll();
-	}
-
-	private void RemoveHarmonyPatches()
-	{
-		_harmonyPatchController?.UnpatchAll();
 	}
 
 	private static void AddBetterSongListFilter()

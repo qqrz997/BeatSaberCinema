@@ -540,7 +540,7 @@ internal class VideoLoader : IInitializable, IAsyncInitializable, IDisposable
 
 	private  async Task<IEnumerable<BundledConfig>> LoadBundledConfigs()
 	{
-		var buffer = await BeatSaberMarkupLanguage.Utilities.GetResourceAsync(Assembly.GetExecutingAssembly(), "BeatSaberCinema.Resources.configs.json");
+		var buffer = await BeatSaberMarkupLanguage.Utilities.GetResourceAsync(Plugin.Assembly, "BeatSaberCinema.Resources.configs.json");
 		var jsonString = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
 		var configs = JsonConvert.DeserializeObject<BundledConfig[]>(jsonString);
 		if (configs == null)

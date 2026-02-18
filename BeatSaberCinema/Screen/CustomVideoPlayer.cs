@@ -175,7 +175,7 @@ internal class CustomVideoPlayer : MonoBehaviour
 		AssetBundle myLoadedAssetBundle;
 		if (path == null)
 		{
-			var bundle = await BeatSaberMarkupLanguage.Utilities.GetResourceAsync(Assembly.GetExecutingAssembly(), "BeatSaberCinema.Resources.bscinema.bundle");
+			var bundle = await BeatSaberMarkupLanguage.Utilities.GetResourceAsync(Plugin.Assembly, "BeatSaberCinema.Resources.bscinema.bundle");
 			if (bundle == null || bundle.Length == 0)
 			{
 				Plugin.Log.Error("GetResource failed");

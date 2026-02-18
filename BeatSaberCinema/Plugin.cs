@@ -6,7 +6,6 @@ using IPA;
 using IPA.Config.Stores;
 using IPA.Logging;
 using IPA.Utilities;
-using IPA.Utilities.Async;
 using JetBrains.Annotations;
 using SiraUtil.Zenject;
 using SongCore;
@@ -24,7 +23,6 @@ internal class Plugin
 
 	internal const string CAPABILITY = "Cinema";
 	private static bool _enabled;
-	private static bool _filterAdded;
 
 	internal static DiContainer menuContainer = null!;
 	internal static DiContainer gameCoreContainer = null!;
@@ -56,8 +54,6 @@ internal class Plugin
 	private static void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO scenesTransition)
 	{
 		PlaybackController.Create();
-
-		AddBetterSongListFilter();
 	}
 
 	[OnEnable]
@@ -72,9 +68,6 @@ internal class Plugin
 		{
 			Log.Warn("dxgi.dll is present, video may fail to play. To fix this, delete the file dxgi.dll from your main Beat Saber folder (not in Plugins).");
 		}
-
-		//No need to index maps if the filter isn't going to be applied anyway
-
 	}
 
 	[OnDisable]
@@ -90,24 +83,5 @@ internal class Plugin
 		EnvironmentController.Disable();
 		StaticSingletons.VideoLoader.StopFileSystemWatcher();
 		Collections.DeregisterCapability(CAPABILITY);
-	}
-
-	private static void AddBetterSongListFilter()
-	{
-		if (!InstalledMods.BetterSongList || _filterAdded)
-		{
-			return;
-		}
-
-		_filterAdded = BetterSongList.FilterMethods.Register(new HasVideoFilter());
-
-		if (_filterAdded)
-		{
-			Log.Debug($"Registered {nameof(HasVideoFilter)}");
-		}
-		else
-		{
-			Log.Error($"Failed to register {nameof(HasVideoFilter)}");
-		}
 	}
 }

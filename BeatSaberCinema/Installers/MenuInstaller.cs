@@ -15,6 +15,7 @@ internal class MenuInstaller : Installer
 		Container.BindInterfacesTo<GameplaySetupTabManager>().AsSingle();
 		Container.BindInterfacesTo<SettingsMenuManager>().AsSingle();
 
+		Container.BindInterfacesTo<BetterSongListFilterManager>().AsSingle();
 		Container.BindInterfacesAndSelfTo<SongPreviewPlayerController>().AsSingle();
 
 		// Affinity patches

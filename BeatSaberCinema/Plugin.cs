@@ -1,7 +1,6 @@
 using System.IO;
 using System.Reflection;
 using BeatSaberCinema.Installers;
-using BS_Utils.Utilities;
 using IPA;
 using IPA.Config.Stores;
 using IPA.Logging;
@@ -45,10 +44,8 @@ internal class Plugin
 	}
 
 	[OnStart]
-	[UsedImplicitly]
 	public void OnApplicationStart()
 	{
-		BSEvents.OnLoad();
 	}
 
 	private static void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO scenesTransition)
@@ -57,11 +54,9 @@ internal class Plugin
 	}
 
 	[OnEnable]
-	[UsedImplicitly]
 	public void OnEnable()
 	{
 		Enabled = true;
-		BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoadedFresh;
 		Collections.RegisterCapability(CAPABILITY);
 		if (File.Exists(Path.Combine(UnityGame.InstallPath, "dxgi.dll")))
 		{
@@ -74,7 +69,6 @@ internal class Plugin
 	public void OnDisable()
 	{
 		Enabled = false;
-		BSEvents.lateMenuSceneLoadedFresh -= OnMenuSceneLoadedFresh;
 
 		//TODO Destroying and re-creating the PlaybackController messes up the VideoMenu without any exceptions in the Plugin.Log. Investigate.
 		//PlaybackController.Destroy();

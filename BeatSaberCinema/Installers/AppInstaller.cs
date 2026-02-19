@@ -21,7 +21,9 @@ internal class AppInstaller : Installer
 		// todo: temporary
 		Container.Bind<StaticSingletons>().AsSingle().NonLazy();
 
-		Container.BindInterfacesTo<HarmonyPatchController>().AsSingle();
+		// todo: affinity
+		// Container.BindInterfacesTo<HarmonyPatchController>().AsSingle();
+		
 		Container.BindInterfacesAndSelfTo<VideoLoader>().AsSingle();
 		Container.BindInterfacesAndSelfTo<EnvironmentController>().AsSingle();
 	}

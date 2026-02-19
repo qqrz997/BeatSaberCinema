@@ -3,15 +3,13 @@ using System.Collections;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using BS_Utils.Gameplay;
-using BS_Utils.Utilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Video;
 
 namespace BeatSaberCinema;
 
-internal class PlaybackController: MonoBehaviour
+internal class PlaybackController : MonoBehaviour
 {
 	public enum Scene { SoloGameplay, MultiplayerGameplay, Menu, Other }
 	private Scene _activeScene = Scene.Other;
@@ -40,12 +38,10 @@ internal class PlaybackController: MonoBehaviour
 
 	public static void Create()
 	{
-		if (Instance != null)
+		if (Instance == null)
 		{
-			return;
+			new GameObject("CinemaPlaybackController").AddComponent<PlaybackController>();
 		}
-
-		new GameObject("CinemaPlaybackController").AddComponent<PlaybackController>();
 	}
 
 	public void Destroy()
@@ -72,12 +68,12 @@ internal class PlaybackController: MonoBehaviour
 		LightController = gameObject.AddComponent<LightController>();
 		VideoPlayer.Player.frameReady += FrameReady;
 		VideoPlayer.Player.sendFrameReadyEvents = true;
-		BSEvents.gameSceneActive += GameSceneActive;
-		BSEvents.gameSceneLoaded += GameSceneLoaded;
-		BSEvents.songPaused += PauseVideo;
-		BSEvents.songUnpaused += ResumeVideo;
-		BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoadedFresh;
-		BSEvents.menuSceneLoaded += OnMenuSceneLoaded;
+		// BSEvents.gameSceneActive += GameSceneActive;
+		// BSEvents.gameSceneLoaded += GameSceneLoaded;
+		// BSEvents.songPaused += PauseVideo;
+		// BSEvents.songUnpaused += ResumeVideo;
+		// BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoadedFresh;
+		// BSEvents.menuSceneLoaded += OnMenuSceneLoaded;
 		StaticSingletons.VideoLoader.ConfigChanged += OnConfigChanged;
 		VideoPlayer.Player.prepareCompleted += OnPrepareComplete;
 		Events.DifficultySelected += DifficultySelected;
@@ -90,12 +86,13 @@ internal class PlaybackController: MonoBehaviour
 	private void OnDestroy()
 	{
 		VideoPlayer.Player.frameReady -= FrameReady;
-		BSEvents.gameSceneActive -= GameSceneActive;
-		BSEvents.gameSceneLoaded -= GameSceneLoaded;
-		BSEvents.songPaused -= PauseVideo;
-		BSEvents.songUnpaused -= ResumeVideo;
-		BSEvents.lateMenuSceneLoadedFresh -= OnMenuSceneLoadedFresh;
-		BSEvents.menuSceneLoaded -= OnMenuSceneLoaded;
+		// todo:
+		// BSEvents.gameSceneActive -= GameSceneActive;
+		// BSEvents.gameSceneLoaded -= GameSceneLoaded;
+		// BSEvents.songPaused -= PauseVideo;
+		// BSEvents.songUnpaused -= ResumeVideo;
+		// BSEvents.lateMenuSceneLoadedFresh -= OnMenuSceneLoadedFresh;
+		// BSEvents.menuSceneLoaded -= OnMenuSceneLoaded;
 		StaticSingletons.VideoLoader.ConfigChanged -= OnConfigChanged;
 		VideoPlayer.Player.prepareCompleted -= OnPrepareComplete;
 		Events.DifficultySelected -= DifficultySelected;
@@ -619,14 +616,15 @@ internal class PlaybackController: MonoBehaviour
 			return;
 		}
 
+		// todo:
 		//If BSUtils has no level data, we're probably in the tutorial
-		if (BS_Utils.Plugin.LevelData.IsSet)
-		{
-			//Move to the environment scene to be picked up by Chroma
-			var sceneName = BS_Utils.Plugin.LevelData.GameplayCoreSceneSetupData.targetEnvironmentInfo.environmentSceneName;
-			var scene = SceneManager.GetSceneByName(sceneName);
-			SceneManager.MoveGameObjectToScene(gameObject, scene);
-		}
+		// if (BS_Utils.Plugin.LevelData.IsSet)
+		// {
+		// 	//Move to the environment scene to be picked up by Chroma
+		// 	var sceneName = BS_Utils.Plugin.LevelData.GameplayCoreSceneSetupData.targetEnvironmentInfo.environmentSceneName;
+		// 	var scene = SceneManager.GetSceneByName(sceneName);
+		// 	SceneManager.MoveGameObjectToScene(gameObject, scene);
+		// }
 
 		Plugin.Log.Debug("Moving to game scene");
 	}
@@ -652,18 +650,19 @@ internal class PlaybackController: MonoBehaviour
 
 		if (!Util.IsInEditor())
 		{
-			if (BS_Utils.Plugin.LevelData.Mode == Mode.None)
-			{
-				Plugin.Log.Debug("Level mode is None");
-				return;
-			}
-
-			var bsUtilsLevel = BS_Utils.Plugin.LevelData.GameplayCoreSceneSetupData.beatmapLevel;
-			if (_currentLevel?.levelID != bsUtilsLevel.levelID)
-			{
-				var video = StaticSingletons.VideoLoader.GetConfigForLevel(bsUtilsLevel);
-				SetSelectedLevel(bsUtilsLevel, video);
-			}
+			// todo:
+			// if (BS_Utils.Plugin.LevelData.Mode == Mode.None)
+			// {
+			// 	Plugin.Log.Debug("Level mode is None");
+			// 	return;
+			// }
+			//
+			// var bsUtilsLevel = BS_Utils.Plugin.LevelData.GameplayCoreSceneSetupData.beatmapLevel;
+			// if (_currentLevel?.levelID != bsUtilsLevel.levelID)
+			// {
+			// 	var video = StaticSingletons.VideoLoader.GetConfigForLevel(bsUtilsLevel);
+			// 	SetSelectedLevel(bsUtilsLevel, video);
+			// }
 		}
 
 		if (VideoConfig == null || !VideoConfig.IsPlayable)
@@ -838,19 +837,20 @@ internal class PlaybackController: MonoBehaviour
 
 		var totalOffset = VideoConfig.GetOffsetInSec();
 		var songSpeed = 1f;
-		if (BS_Utils.Plugin.LevelData.IsSet)
-		{
-			songSpeed = BS_Utils.Plugin.LevelData.GameplayCoreSceneSetupData.gameplayModifiers.songSpeedMul;
-
-			if (BS_Utils.Plugin.LevelData.GameplayCoreSceneSetupData?.practiceSettings != null)
-			{
-				songSpeed = BS_Utils.Plugin.LevelData.GameplayCoreSceneSetupData.practiceSettings.songSpeedMul;
-				if ((totalOffset+startTime) < 0)
-				{
-					totalOffset /= (songSpeed * VideoConfig.PlaybackSpeed);
-				}
-			}
-		}
+		// todo:
+		// if (BS_Utils.Plugin.LevelData.IsSet)
+		// {
+		// 	songSpeed = BS_Utils.Plugin.LevelData.GameplayCoreSceneSetupData.gameplayModifiers.songSpeedMul;
+		//
+		// 	if (BS_Utils.Plugin.LevelData.GameplayCoreSceneSetupData?.practiceSettings != null)
+		// 	{
+		// 		songSpeed = BS_Utils.Plugin.LevelData.GameplayCoreSceneSetupData.practiceSettings.songSpeedMul;
+		// 		if ((totalOffset+startTime) < 0)
+		// 		{
+		// 			totalOffset /= (songSpeed * VideoConfig.PlaybackSpeed);
+		// 		}
+		// 	}
+		// }
 
 		VideoPlayer.PlaybackSpeed = songSpeed * VideoConfig.PlaybackSpeed;
 		totalOffset += startTime; //This must happen after song speed adjustment

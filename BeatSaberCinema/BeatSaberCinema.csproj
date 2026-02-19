@@ -98,10 +98,6 @@
 		  <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGLib.UnityExtension.dll</HintPath>
 		  <Private>false</Private>
 		</Reference>
-		<Reference Include="BS_Utils">
-		  <HintPath>$(BeatSaberDir)\Plugins\BS_Utils.dll</HintPath>
-		  <Private>false</Private>
-		</Reference>
 		<Reference Include="BSML">
 		  <HintPath>$(BeatSaberDir)\Plugins\BSML.dll</HintPath>
 		  <Private>false</Private>

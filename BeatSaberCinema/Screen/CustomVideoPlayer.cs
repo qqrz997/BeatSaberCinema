@@ -1,10 +1,6 @@
 using System;
-using System.Collections;
 using System.Diagnostics;
-using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
-using BS_Utils.Utilities;
 using IPA.Utilities.Async;
 using UnityEngine;
 using UnityEngine.Video;
@@ -118,7 +114,8 @@ internal class CustomVideoPlayer : MonoBehaviour
 		FadeController.EasingUpdate += FadeControllerUpdate;
 		Hide();
 
-		BSEvents.menuSceneLoaded += OnMenuSceneLoaded;
+		// todo:
+		// BSEvents.menuSceneLoaded += OnMenuSceneLoaded;
 		SetDefaultMenuPlacement();
 
 #if DEBUG
@@ -139,7 +136,6 @@ internal class CustomVideoPlayer : MonoBehaviour
 
 	public void OnDestroy()
 	{
-		BSEvents.menuSceneLoaded -= OnMenuSceneLoaded;
 		FadeController.EasingUpdate -= FadeControllerUpdate;
 		_renderTexture.Release();
 	}

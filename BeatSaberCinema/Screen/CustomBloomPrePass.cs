@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BS_Utils.Utilities;
 using UnityEngine;
 
 namespace BeatSaberCinema;
@@ -42,9 +41,11 @@ internal class CustomBloomPrePass : MonoBehaviour
 			_additiveMaterial = new Material(_kawaseBlurRenderer._additiveMaterial.shader);
 		}
 
-		BSEvents.menuSceneLoaded += UpdateMesh;
-		BSEvents.gameSceneLoaded += UpdateMesh;
-		BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoaded;
+		// todo:
+		// make sure mesh is updated properly
+		// BSEvents.menuSceneLoaded += UpdateMesh;
+		// BSEvents.gameSceneLoaded += UpdateMesh;
+		// BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoaded;
 
 		OnMenuSceneLoaded(null! /* unused param */);
 	}
@@ -261,9 +262,9 @@ internal class CustomBloomPrePass : MonoBehaviour
 
 	private void OnDestroy()
 	{
-		BSEvents.menuSceneLoaded -= UpdateMesh;
-		BSEvents.gameSceneLoaded -= UpdateMesh;
-		BSEvents.lateMenuSceneLoadedFresh -= OnMenuSceneLoaded;
+		// BSEvents.menuSceneLoaded -= UpdateMesh;
+		// BSEvents.gameSceneLoaded -= UpdateMesh;
+		// BSEvents.lateMenuSceneLoadedFresh -= OnMenuSceneLoaded;
 	}
 
 	private void DoubleBlur(RenderTexture src, RenderTexture dest, KawaseBlurRendererSO.KernelSize kernelSize0, float boost0, KawaseBlurRendererSO.KernelSize kernelSize1, float boost1, float secondBlurAlpha, int downsample)

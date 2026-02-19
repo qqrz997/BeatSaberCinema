@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using BeatSaberCinema.Patches;
-using BS_Utils.Utilities;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Video;
@@ -60,8 +59,9 @@ public class LightController : MonoBehaviour
 		_customVideoPlayer.stopped += VideoStopped;
 		_customVideoPlayer.FadeController.EasingUpdate += OnFadeUpdate;
 		Events.LevelSelected += OnLevelSelected;
-		BSEvents.menuSceneLoaded += OnMenuSceneLoaded;
-		BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoadedFresh;
+		// todo:
+		// BSEvents.menuSceneLoaded += OnMenuSceneLoaded;
+		// BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoadedFresh;
 	}
 
 	private void OnDisable()
@@ -70,8 +70,8 @@ public class LightController : MonoBehaviour
 		_customVideoPlayer.stopped -= VideoStopped;
 		_customVideoPlayer.FadeController.EasingUpdate -= OnFadeUpdate;
 		Events.LevelSelected -= OnLevelSelected;
-		BSEvents.menuSceneLoaded -= OnMenuSceneLoaded;
-		BSEvents.lateMenuSceneLoadedFresh -= OnMenuSceneLoadedFresh;
+		// BSEvents.menuSceneLoaded -= OnMenuSceneLoaded;
+		// BSEvents.lateMenuSceneLoadedFresh -= OnMenuSceneLoadedFresh;
 
 		VideoStopped();
 	}

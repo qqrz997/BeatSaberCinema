@@ -62,7 +62,6 @@ internal class Plugin
 	{
 		Enabled = true;
 		BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoadedFresh;
-		EnvironmentController.Init();
 		Collections.RegisterCapability(CAPABILITY);
 		if (File.Exists(Path.Combine(UnityGame.InstallPath, "dxgi.dll")))
 		{
@@ -80,7 +79,6 @@ internal class Plugin
 		//TODO Destroying and re-creating the PlaybackController messes up the VideoMenu without any exceptions in the Plugin.Log. Investigate.
 		//PlaybackController.Destroy();
 
-		EnvironmentController.Disable();
 		StaticSingletons.VideoLoader.StopFileSystemWatcher();
 		Collections.DeregisterCapability(CAPABILITY);
 	}

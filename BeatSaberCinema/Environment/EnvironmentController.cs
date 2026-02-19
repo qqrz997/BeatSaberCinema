@@ -6,32 +6,33 @@ using System.Text.RegularExpressions;
 using IPA.Utilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Zenject;
 using static BeatSaberCinema.VideoConfig;
 using Object = UnityEngine.Object;
 
 namespace BeatSaberCinema;
 
-public static class EnvironmentController
+public class EnvironmentController : IInitializable, IDisposable
 {
 	private const float CLONED_OBJECT_Z_OFFSET = 200f;
 	private const string CLONED_OBJECT_NAME_SUFFIX = " (CinemaClone)";
 	private const string HIDE_CINEMA_SCREEN_OBJECT_NAME = "HideCinemaScreen";
 
-	private static bool _environmentModified;
-	private static string _currentEnvironmentName = "MainMenu";
-	internal static bool IsScreenHidden { get; private set; }
-	private static List<EnvironmentObject>? _environmentObjectList;
-	private static IEnumerable<EnvironmentObject> EnvironmentObjects
+	private bool _environmentModified;
+	private string _currentEnvironmentName = "MainMenu";
+	internal bool IsScreenHidden { get; private set; }
+	private List<EnvironmentObject> _environmentObjectList = [];
+	private IEnumerable<EnvironmentObject> EnvironmentObjects
 	{
 		get
 		{
-			if (_environmentObjectList != null && _environmentObjectList.Any())
+			if (_environmentObjectList is not [])
 			{
 				return _environmentObjectList;
 			}
 
 			//Cache the state of all GameObjects
-			_environmentObjectList = new List<EnvironmentObject>(10000);
+			_environmentObjectList = new(10000);
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 			var gameObjects = Resources.FindObjectsOfTypeAll<GameObject>();
@@ -57,18 +58,18 @@ public static class EnvironmentController
 		}
 	}
 
-	public static void Init()
+	public void Initialize()
 	{
 		SceneManager.activeSceneChanged += SceneChanged;
 	}
 
-	public static void Disable()
+	public void Dispose()
 	{
 		SceneManager.activeSceneChanged -= SceneChanged;
 		_environmentObjectList?.Clear();
 	}
 
-	private static void SceneChanged(Scene arg0, Scene arg1)
+	private void SceneChanged(Scene arg0, Scene arg1)
 	{
 		Plugin.Log.Debug($"Scene changed from {arg0.name} to {arg1.name}");
 		var sceneName = arg1.name;
@@ -84,7 +85,7 @@ public static class EnvironmentController
 		}
 	}
 
-	public static void ModifyGameScene(VideoConfig? videoConfig)
+	public void ModifyGameScene(VideoConfig? videoConfig)
 	{
 		//Move back to the DontDestroyOnLoad scene
 		Object.DontDestroyOnLoad(PlaybackController.Instance);
@@ -137,7 +138,7 @@ public static class EnvironmentController
 		Plugin.Log.Debug($"Modified environment in {stopwatch.ElapsedMilliseconds} ms");
 	}
 
-	private static void Reset()
+	private void Reset()
 	{
 		if (!PlaybackController.Instance)
 		{
@@ -199,7 +200,7 @@ public static class EnvironmentController
 		}
 	}
 
-	private static void DefaultSceneModifications(VideoConfig? videoConfig)
+	private void DefaultSceneModifications(VideoConfig? videoConfig)
 	{
 		//Scuffed way for custom platforms to hide the screen while keeping the video running
 		if (EnvironmentObjects.FirstOrDefault(x => x.name == HIDE_CINEMA_SCREEN_OBJECT_NAME) != null)
@@ -999,7 +1000,7 @@ public static class EnvironmentController
 		}
 	}
 
-	public static void VideoConfigSceneModifications(VideoConfig? config)
+	public void VideoConfigSceneModifications(VideoConfig? config)
 	{
 		if (config == null)
 		{
@@ -1090,9 +1091,9 @@ public static class EnvironmentController
 		}
 	}
 
-	private static List<EnvironmentObject> SelectObjectsFromScene(EnvironmentModification modification, bool selectByCloneFrom)
+	private List<EnvironmentObject> SelectObjectsFromScene(EnvironmentModification modification, bool selectByCloneFrom)
 	{
-		modification = TranslateNameForBackwardsCompatibility(modification);
+		modification = TranslateNameForBackwardsCompatibility(modification, _currentEnvironmentName);
 		var name = selectByCloneFrom ? modification.cloneFrom! : modification.name;
 		var parentName = modification.parentName;
 		if (!selectByCloneFrom && modification.cloneFrom != null)
@@ -1116,57 +1117,7 @@ public static class EnvironmentController
 		return environmentObjectList;
 	}
 
-	private static void CreateAdditionalScreens(VideoConfig videoConfig)
-	{
-		if (videoConfig.additionalScreens == null)
-		{
-			return;
-		}
-
-		var screenController = PlaybackController.Instance.VideoPlayer.screenController;
-		var i = 0;
-		foreach (var _ in videoConfig.additionalScreens)
-		{
-			var clone = Object.Instantiate(screenController.Screens[0], screenController.Screens[0].transform.parent);
-			clone.name += $" ({i++.ToString()})";
-		}
-	}
-
-	private static void PrepareClonedScreens(VideoConfig videoConfig)
-	{
-		var screenCount = PlaybackController.Instance.gameObject.transform.childCount;
-
-		if (screenCount <= 1)
-		{
-			return;
-		}
-
-		Plugin.Log.Debug($"Screens found: {screenCount}");
-		foreach (Transform screen in PlaybackController.Instance.gameObject.transform)
-		{
-			if (!screen.name.StartsWith("CinemaScreen"))
-			{
-				return;
-			}
-
-			if (screen.name.Contains("Clone"))
-			{
-				PlaybackController.Instance.VideoPlayer.screenController.Screens.Add(screen.gameObject);
-				screen.GetComponent<Renderer>().material = PlaybackController.Instance.VideoPlayer.screenController.Screens[0].GetComponent<Renderer>().material;
-				Object.Destroy(screen.Find("CinemaDirectionalLight").gameObject);
-			}
-
-			screen.gameObject.GetComponent<CustomBloomPrePass>().enabled = false;
-			Plugin.Log.Debug("Disabled bloom prepass");
-		}
-
-		PlaybackController.Instance.VideoPlayer.SetPlacement(
-			Placement.CreatePlacementForConfig(videoConfig, PlaybackController.Scene.SoloGameplay, PlaybackController.Instance.VideoPlayer.GetVideoAspectRatio())
-		);
-		PlaybackController.Instance.VideoPlayer.screenController.SetShaderParameters(videoConfig);
-	}
-
-	private static void CloneObjects(VideoConfig? config)
+	private void CloneObjects(VideoConfig? config)
 	{
 		if (config?.environment == null || config.environment.Length == 0 || Util.IsMultiplayer())
 		{
@@ -1196,7 +1147,7 @@ public static class EnvironmentController
 		Plugin.Log.Debug("Cloned "+cloneCounter+" objects");
 	}
 
-	private static EnvironmentObject CloneObject(GameObject originalObject, EnvironmentModification objectToBeCloned, VideoConfig? config, bool disableZOffset = false)
+	private EnvironmentObject CloneObject(GameObject originalObject, EnvironmentModification objectToBeCloned, VideoConfig? config, bool disableZOffset = false)
 	{
 		var lightManager = EnvironmentObjects.LastOrDefault(x => x.name == "LightWithIdManager");
 		if (lightManager == null)
@@ -1251,6 +1202,56 @@ public static class EnvironmentController
 		}
 	}
 
+	private static void CreateAdditionalScreens(VideoConfig videoConfig)
+	{
+		if (videoConfig.additionalScreens == null)
+		{
+			return;
+		}
+
+		var screenController = PlaybackController.Instance.VideoPlayer.screenController;
+		var i = 0;
+		foreach (var _ in videoConfig.additionalScreens)
+		{
+			var clone = Object.Instantiate(screenController.Screens[0], screenController.Screens[0].transform.parent);
+			clone.name += $" ({i++.ToString()})";
+		}
+	}
+
+	private static void PrepareClonedScreens(VideoConfig videoConfig)
+	{
+		var screenCount = PlaybackController.Instance.gameObject.transform.childCount;
+
+		if (screenCount <= 1)
+		{
+			return;
+		}
+
+		Plugin.Log.Debug($"Screens found: {screenCount}");
+		foreach (Transform screen in PlaybackController.Instance.gameObject.transform)
+		{
+			if (!screen.name.StartsWith("CinemaScreen"))
+			{
+				return;
+			}
+
+			if (screen.name.Contains("Clone"))
+			{
+				PlaybackController.Instance.VideoPlayer.screenController.Screens.Add(screen.gameObject);
+				screen.GetComponent<Renderer>().material = PlaybackController.Instance.VideoPlayer.screenController.Screens[0].GetComponent<Renderer>().material;
+				Object.Destroy(screen.Find("CinemaDirectionalLight").gameObject);
+			}
+
+			screen.gameObject.GetComponent<CustomBloomPrePass>().enabled = false;
+			Plugin.Log.Debug("Disabled bloom prepass");
+		}
+
+		PlaybackController.Instance.VideoPlayer.SetPlacement(
+			Placement.CreatePlacementForConfig(videoConfig, PlaybackController.Scene.SoloGameplay, PlaybackController.Instance.VideoPlayer.GetVideoAspectRatio())
+		);
+		PlaybackController.Instance.VideoPlayer.screenController.SetShaderParameters(videoConfig);
+	}
+
 	private static void RegisterLight(LightWithIdMonoBehaviour? newLight, LightWithIdManager lightWithIdManager)
 	{
 		if (newLight != null)
@@ -1294,13 +1295,13 @@ public static class EnvironmentController
 		component._meshRenderers = meshRendererList.ToArray();
 	}
 
-	private static EnvironmentModification TranslateNameForBackwardsCompatibility(EnvironmentModification modification)
+	private static EnvironmentModification TranslateNameForBackwardsCompatibility(EnvironmentModification modification, string environmentName)
 	{
 		var selectByCloneFrom = modification.cloneFrom != null;
 		var name = selectByCloneFrom ? modification.cloneFrom! : modification.name;
 		var newName = name;
 
-		switch (_currentEnvironmentName)
+		switch (environmentName)
 		{
 			case "BigMirrorEnvironment":
 			{

@@ -30,6 +30,6 @@ internal static class LightSwitchEventEffectStart
 		//TODO Find a better way to implement this. The problematic coroutine in CustomPlatforms is CustomFloorPlugin.EnvironmentHider+<InternalHideObjectsForPlatform>
 		yield return new WaitForSeconds(InstalledMods.CustomPlatforms ? 0.75f : 0.05f);
 
-		EnvironmentController.ModifyGameScene(PlaybackController.Instance.VideoConfig);
+		StaticSingletons.EnvironmentController.ModifyGameScene(PlaybackController.Instance.VideoConfig);
 	}
 }

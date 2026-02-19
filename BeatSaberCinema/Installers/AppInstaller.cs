@@ -23,5 +23,6 @@ internal class AppInstaller : Installer
 
 		Container.BindInterfacesTo<HarmonyPatchController>().AsSingle();
 		Container.BindInterfacesAndSelfTo<VideoLoader>().AsSingle();
+		Container.BindInterfacesAndSelfTo<EnvironmentController>().AsSingle();
 	}
 }

@@ -276,7 +276,7 @@ internal class CustomVideoPlayer : MonoBehaviour
 
 	public void FadeIn(float duration = 0.4f)
 	{
-		if (EnvironmentController.IsScreenHidden)
+		if (StaticSingletons.EnvironmentController.IsScreenHidden)
 		{
 			return;
 		}

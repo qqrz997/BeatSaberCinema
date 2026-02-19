@@ -496,7 +496,7 @@ internal class PlaybackController: MonoBehaviour
 
 		if (_activeScene == Scene.SoloGameplay)
 		{
-			EnvironmentController.VideoConfigSceneModifications(VideoConfig);
+			StaticSingletons.EnvironmentController.VideoConfigSceneModifications(VideoConfig);
 		}
 	}
 
